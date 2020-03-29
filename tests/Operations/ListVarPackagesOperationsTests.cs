@@ -41,14 +41,18 @@ namespace Varbsorb.Operations
         {
             using var ms = new MemoryStream();
             using var archive = new ZipArchive(ms, ZipArchiveMode.Create, true);
-            var scriptEntry = archive.CreateEntry(@"Custom\Scripts\Author\Script.cs");
-            using StreamWriter writer = new StreamWriter(scriptEntry.Open());
-            writer.WriteLine("public class MyScript : MVRScript { }");
-            writer.Flush();
-            writer.Dispose();
+            CreateFakeZipEntry(archive, @"Custom\Scripts\Author\Script.cs", "public class MyScript : MVRScript { }");
+            CreateFakeZipEntry(archive, @"meta.json", "{}");
             archive.Dispose();
             ms.Seek(0, SeekOrigin.Begin);
             return ms.ToArray();
+        }
+
+        private static void CreateFakeZipEntry(ZipArchive archive, string path, string contents)
+        {
+            var scriptEntry = archive.CreateEntry(path);
+            using var writer = new StreamWriter(scriptEntry.Open());
+            writer.WriteLine(contents);
         }
     }
 }

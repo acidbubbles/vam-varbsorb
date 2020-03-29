@@ -36,6 +36,11 @@ ListFilesOperationsTests
                 @$"{VamPath}\Custom\Scripts\Author\Script.cs",
                 @$"{VamPath}\Saves\Author\Scene.json",
             }));
+
+            Assert.That(files.Select(f => f.LocalPath).OrderBy(f => f), Is.EqualTo(new[]{
+                @"Custom\Scripts\Author\Script.cs",
+                @"Saves\Author\Scene.json",
+            }));
         }
     }
 }

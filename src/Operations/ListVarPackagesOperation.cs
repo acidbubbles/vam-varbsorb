@@ -33,7 +33,9 @@ namespace Varbsorb.Operations
                     using var archive = new ZipArchive(stream);
                     foreach (var entry in archive.Entries)
                     {
-                        var packageFile = new VarPackageFile { LocalPath = entry.FullName };
+                        if(entry.FullName.EndsWith(@"/")) continue;
+                        if(entry.FullName == "meta.json") continue;
+                        var packageFile = new VarPackageFile { LocalPath = entry.FullName.Replace('/', '\\') };
                         package.Files.Add(packageFile);
                     }
                     if(package.Files.Count > 0)

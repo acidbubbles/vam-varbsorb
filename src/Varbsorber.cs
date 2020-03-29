@@ -18,7 +18,8 @@ namespace Varbsorb
         {
             var varFiles = await _operationsFactory.Get<IListVarPackagesOperation>().ExecuteAsync(vam);
             var freeFiles = await _operationsFactory.Get<IListFilesOperation>().ExecuteAsync(vam);
-            _output.WriteLine($"Completed contents listing: {varFiles.Count} var packages, {freeFiles.Count} free files.");
+            var matches = await _operationsFactory.Get<IMatchFilesToPackagesOperation>().ExecuteAsync(varFiles, freeFiles);
+            _output.WriteLine($"Completed contents listing: found {matches.Count} matches in {varFiles.Count} var packages, {freeFiles.Count} free files.");
         }
     }
 }

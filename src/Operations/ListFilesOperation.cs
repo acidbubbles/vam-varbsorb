@@ -27,8 +27,8 @@ namespace Varbsorb.Operations
             using (var reporter = new ProgressReporter<ListFilesProgress>(StartProgress, ReportProgress, CompleteProgress))
             {
                 var counter = 0;
-                files.AddRange(_fs.Directory.GetFiles(_fs.Path.Combine(vam, "Custom"), "*.*", SearchOption.AllDirectories).Select(f => new FreeFile(f)).Tap(f => reporter.Report(new ListFilesProgress { Folder = _fs.Path.GetDirectoryName(f.Path), Files = ++counter })));
-                files.AddRange(_fs.Directory.GetFiles(_fs.Path.Combine(vam, "Saves"), "*.*", SearchOption.AllDirectories).Select(f => new FreeFile(f)).Tap(f => reporter.Report(new ListFilesProgress { Folder = _fs.Path.GetDirectoryName(f.Path), Files = ++counter })));
+                files.AddRange(_fs.Directory.GetFiles(_fs.Path.Combine(vam, "Custom"), "*.*", SearchOption.AllDirectories).Select(f => new FreeFile(vam, f)).Tap(f => reporter.Report(new ListFilesProgress { Folder = _fs.Path.GetDirectoryName(f.Path), Files = ++counter })));
+                files.AddRange(_fs.Directory.GetFiles(_fs.Path.Combine(vam, "Saves"), "*.*", SearchOption.AllDirectories).Select(f => new FreeFile(vam, f)).Tap(f => reporter.Report(new ListFilesProgress { Folder = _fs.Path.GetDirectoryName(f.Path), Files = ++counter })));
             }
 
             _output.WriteLine($"Found {files.Count} files in the Saves and Custom folders.");
