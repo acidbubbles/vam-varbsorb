@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Threading.Tasks;
 
-namespace src
+namespace Varbsorb
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string vam, bool noop)
         {
-            Console.WriteLine("Hello World!");
+            var output = new ConsoleOutput(Console.Out);
+            var runtime = new Varbsorber(output, vam, noop);
+            await runtime.ExecuteAsync();
         }
     }
 }
