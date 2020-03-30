@@ -30,7 +30,7 @@ namespace Varbsorb.Operations
         public async Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files)
         {
             var scenes = new List<SceneFile>();
-            var filesIndex = files.Where(f => f.Extension != ".json").ToDictionary(f => f.LocalPath, f => f);
+            var filesIndex = files.Where(f => f.Extension != ".json").ToDictionary(f => f.Path, f => f);
             using (var reporter = new ProgressReporter<ListScenesProgress>(StartProgress, ReportProgress, CompleteProgress))
             {
                 var scenesScanned = 0;
@@ -50,11 +50,11 @@ namespace Varbsorb.Operations
                         if(reference.EndsWith(".cslist") && reference.Contains("timeline")){
                             var temp = filesIndex.Where(k => k.Value.Extension == ".cslist").ToList();
                         }
-                        if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(sceneFolder, reference).RelativeTo(vam)), out var f1))
+                        if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(sceneFolder, reference)), out var f1))
                         {
                             references.Add(f1);
                         }
-                        else if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(vam, reference).RelativeTo(vam)), out var f2))
+                        else if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(vam, reference)), out var f2))
                         {
                             references.Add(f2);
                         }
