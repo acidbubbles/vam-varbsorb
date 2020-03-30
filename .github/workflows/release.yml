@@ -21,19 +21,19 @@ jobs:
     - name: Get the version
       id: get_version
       run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
-    - name: Publish
-      run: dotnet publish --configuration Release --no-restore
+    - name: Publish x64
+      run: dotnet publish --configuration Release --no-restore -r win10-x64 --self-contained true
     - name: Zip the release package
       id: zip
       run: |
         cd src/bin/Release/netcoreapp3.1/publish
-        zip -r varbsorb.zip *
+        zip -r varbsorb-x64.zip *
     - name: GitHub release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
         draft: true
-        files: src/bin/Release/netcoreapp3.1/publish/varbsorb.zip
+        files: src/bin/Release/netcoreapp3.1/publish/varbsorb-x64.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
  
