@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.IO.Compression;
 using System.Threading.Tasks;
+using Varbsorb.Models;
 
 namespace Varbsorb.Operations
 {
@@ -56,10 +57,11 @@ namespace Varbsorb.Operations
 
         private async Task<VarPackageFile> ReadPackageFileAsync(ZipArchiveEntry entry)
         {
-            var packageFile = new VarPackageFile
-            {
-                LocalPath = entry.FullName.Replace('/', '\\')
-            };
+            var packageFile = new VarPackageFile(
+                entry.FullName.Replace('/', '\\'),
+                _fs.Path.GetFileName(entry.FullName.ToLowerInvariant()),
+                _fs.Path.GetExtension(entry.FullName).ToLowerInvariant()
+            );
             using var entryMemoryStream = new MemoryStream();
             using (var entryStream = entry.Open())
             {

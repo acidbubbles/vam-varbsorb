@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace Varbsorb
+namespace Varbsorb.Models
 {
     public class VarPackage
     {
@@ -47,9 +47,13 @@ namespace Varbsorb
         }
     }
 
-    public class VarPackageFile
+    public class VarPackageFile : FileReferenceBase
     {
-        public string LocalPath { get; set; }
-        public string Hash { get; set; }
+        public VarPackageFile(string localPath, string filenameLower, string extension)
+        {
+            LocalPath = localPath;
+            FilenameLower = filenameLower;
+            Extension = extension;
+        }
     }
 }

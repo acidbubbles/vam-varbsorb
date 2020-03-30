@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Varbsorb
+namespace Varbsorb.Models
 {
     public class FreeFilePackageMatch
     {
