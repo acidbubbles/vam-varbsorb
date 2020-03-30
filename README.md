@@ -1,6 +1,18 @@
 # Virt-A-Mate Absorb
 
+![Package](https://github.com/acidbubbles/vam-varbsorb/workflows/Package/badge.svg)
+
 Get rid of your files that are available in a .var file.
+
+## Usage
+
+Download from the [Releases](https://github.com/acidbubbles/vam-varbsorb/releases), and extract somewhere on your machine.
+
+In a command line:
+
+```bash
+> varbsorb --vam C:\Vam
+```
 
 ## Contributing
 
