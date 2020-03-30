@@ -17,13 +17,22 @@ namespace Varbsorb
 
         public async Task ExecuteAsync(string vam, bool noop)
         {
+            if (vam.EndsWith('/') || vam.EndsWith('\\')) vam = vam[0..^1];
+
             var varFiles = await _operationsFactory.Get<IListVarPackagesOperation>().ExecuteAsync(vam);
             var freeFiles = await _operationsFactory.Get<IListFilesOperation>().ExecuteAsync(vam);
             var matches = await _operationsFactory.Get<IMatchFilesToPackagesOperation>().ExecuteAsync(varFiles, freeFiles);
             _output.WriteLine($"Completed contents listing: found {matches.Count} matches in {varFiles.Count} var packages, {freeFiles.Count} free files.");
-            foreach(var match in matches.GroupBy(m => m.Package))
+            foreach (var match in matches.GroupBy(m => m.Package))
             {
                 _output.WriteLine($"Package {match.Key} matched {match.SelectMany(m => m.FreeFiles).Count()} files");
+                foreach (var one in match)
+                {
+                    foreach (var file in one.FreeFiles)
+                    {
+                        _output.WriteLine($"  {file.LocalPath}");
+                    }
+                }
             }
         }
     }

@@ -16,6 +16,7 @@ namespace Varbsorb.Operations
 
         protected void CompleteProgress()
         {
+            _output.WriteAndReset("");
             _output.CursorVisible = false;
         }
     }
