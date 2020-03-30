@@ -36,7 +36,9 @@ namespace Varbsorb.Operations
                         foreach (var matchingFreeFile in matchingFreeFiles)
                         {
                             if (matchingFreeFile.Hash != null) continue;
-                            matchingFreeFile.Hash = _hashingAlgo.GetHash(await _fs.File.ReadAllBytesAsync(matchingFreeFile.Path));
+                            var bytes = await _fs.File.ReadAllBytesAsync(matchingFreeFile.Path);
+                            matchingFreeFile.Size = bytes.Length;
+                            matchingFreeFile.Hash = _hashingAlgo.GetHash(bytes);
                         }
                         var matchedFreeFiles = matchingFreeFiles
                             .Where(ff =>

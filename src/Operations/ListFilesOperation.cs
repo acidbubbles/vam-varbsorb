@@ -24,11 +24,11 @@ namespace Varbsorb.Operations
             {
                 var counter = 0;
                 files.AddRange(_fs.Directory
-                    .GetFiles(_fs.Path.Combine(vam, "Custom"), "*.*", SearchOption.AllDirectories)
+                    .EnumerateFiles(_fs.Path.Combine(vam, "Custom"), "*.*", SearchOption.AllDirectories)
                     .Select(f => new FreeFile(f, f.RelativeTo(vam), _fs.Path.GetFileName(f).ToLowerInvariant(), _fs.Path.GetExtension(f).ToLowerInvariant()))
                     .Tap(f => reporter.Report(new ListFilesProgress { Folder = _fs.Path.GetDirectoryName(f.Path), Files = ++counter })));
                 files.AddRange(_fs.Directory
-                    .GetFiles(_fs.Path.Combine(vam, "Saves"), "*.*", SearchOption.AllDirectories)
+                    .EnumerateFiles(_fs.Path.Combine(vam, "Saves"), "*.*", SearchOption.AllDirectories)
                     .Select(f => new FreeFile(f, f.RelativeTo(vam), _fs.Path.GetFileName(f).ToLowerInvariant(), _fs.Path.GetExtension(f).ToLowerInvariant()))
                     .Tap(f => reporter.Report(new ListFilesProgress { Folder = _fs.Path.GetDirectoryName(f.Path), Files = ++counter })));
 
