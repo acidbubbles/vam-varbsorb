@@ -11,7 +11,7 @@ namespace Varbsorb.Operations
     public class ListScenesOperation : OperationBase, IListScenesOperation
     {
         private static readonly Regex _findFilesFastRegex = new Regex(
-            ": ?\"(?<path>[^\"]+\\.[a-zA-Z]{3,6})\"",
+            ": ?\"(?<path>[^\"]+\\.[a-zA-Z]{2,6})\"",
             RegexOptions.Compiled | RegexOptions.ExplicitCapture,
             TimeSpan.FromSeconds(10));
         private readonly IFileSystem _fs;
