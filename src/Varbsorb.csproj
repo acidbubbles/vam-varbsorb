@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>varbsorb</AssemblyName>
+    <RuntimeIdentifiers>win10-x64</RuntimeIdentifiers>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <DefaultNamespace>Varbsorb</DefaultNamespace>
     <NoWarn>1591</NoWarn>

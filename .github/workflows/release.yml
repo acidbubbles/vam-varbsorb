@@ -23,7 +23,7 @@ jobs:
       run: echo "::set-output name=VERSION::$($env:GITHUB_REF.Substring(11))"
       shell: powershell
     - name: Publish x64
-      run: dotnet publish --configuration Release --no-restore -r win10-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:UseAppHost=true /p:Version=${{ steps.get_version.outputs.VERSION }}
+      run: dotnet publish --configuration Release --no-restore -r win10-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true /p:UseAppHost=true /p:Version=${{ steps.get_version.outputs.VERSION }}
     - name: Zip the release package
       id: zip
       run: |
