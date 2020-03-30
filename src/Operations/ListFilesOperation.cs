@@ -7,11 +7,6 @@ using Varbsorb.Models;
 
 namespace Varbsorb.Operations
 {
-    public interface IListFilesOperation : IOperation
-    {
-        Task<IList<FreeFile>> ExecuteAsync(string vam);
-    }
-
     public class ListFilesOperation : OperationBase, IListFilesOperation
     {
         private readonly IFileSystem _fs;
@@ -31,18 +26,16 @@ namespace Varbsorb.Operations
                 files.AddRange(_fs.Directory
                     .GetFiles(_fs.Path.Combine(vam, "Custom"), "*.*", SearchOption.AllDirectories)
                     .Select(f => new FreeFile(f, f.RelativeTo(vam), _fs.Path.GetFileName(f).ToLowerInvariant(), _fs.Path.GetExtension(f).ToLowerInvariant()))
-                    .Tap(f => reporter.Report(new ListFilesProgress { Folder = _fs.Path.GetDirectoryName(f.Path), Files = ++counter }))
-                );
+                    .Tap(f => reporter.Report(new ListFilesProgress { Folder = _fs.Path.GetDirectoryName(f.Path), Files = ++counter })));
                 files.AddRange(_fs.Directory
                     .GetFiles(_fs.Path.Combine(vam, "Saves"), "*.*", SearchOption.AllDirectories)
                     .Select(f => new FreeFile(f, f.RelativeTo(vam), _fs.Path.GetFileName(f).ToLowerInvariant(), _fs.Path.GetExtension(f).ToLowerInvariant()))
-                    .Tap(f => reporter.Report(new ListFilesProgress { Folder = _fs.Path.GetDirectoryName(f.Path), Files = ++counter }))
-                );
+                    .Tap(f => reporter.Report(new ListFilesProgress { Folder = _fs.Path.GetDirectoryName(f.Path), Files = ++counter })));
 
                 await GroupCslistRefs(vam, files);
             }
 
-            _output.WriteLine($"Found {files.Count} files in the Saves and Custom folders.");
+            Output.WriteLine($"Found {files.Count} files in the Saves and Custom folders.");
 
             return files;
         }
@@ -81,7 +74,12 @@ namespace Varbsorb.Operations
 
         private void ReportProgress(ListFilesProgress progress)
         {
-            _output.WriteAndReset($"Scanning... {progress.Files} discovered: {progress.Folder}");
+            Output.WriteAndReset($"Scanning... {progress.Files} discovered: {progress.Folder}");
         }
+    }
+
+    public interface IListFilesOperation : IOperation
+    {
+        Task<IList<FreeFile>> ExecuteAsync(string vam);
     }
 }

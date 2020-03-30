@@ -3,15 +3,11 @@ using System.IO;
 using System.IO.Abstractions;
 using System.IO.Compression;
 using System.Threading.Tasks;
+using Varbsorb.Hashing;
 using Varbsorb.Models;
 
 namespace Varbsorb.Operations
 {
-    public interface IListVarPackagesOperation : IOperation
-    {
-        Task<IList<VarPackage>> ExecuteAsync(string vam);
-    }
-
     public class ListVarPackagesOperation : OperationBase, IListVarPackagesOperation
     {
         private readonly IFileSystem _fs;
@@ -53,7 +49,7 @@ namespace Varbsorb.Operations
                 }
             }
 
-            _output.WriteLine($"Found {packages.Count} packages in the AddonPackages folder.");
+            Output.WriteLine($"Found {packages.Count} packages in the AddonPackages folder.");
 
             return packages;
         }
@@ -63,8 +59,7 @@ namespace Varbsorb.Operations
             var packageFile = new VarPackageFile(
                 entry.FullName.Replace('/', '\\'),
                 _fs.Path.GetFileName(entry.FullName.ToLowerInvariant()),
-                _fs.Path.GetExtension(entry.FullName).ToLowerInvariant()
-            );
+                _fs.Path.GetExtension(entry.FullName).ToLowerInvariant());
             using var entryMemoryStream = new MemoryStream();
             using (var entryStream = entry.Open())
             {
@@ -83,7 +78,12 @@ namespace Varbsorb.Operations
 
         private void ReportProgress(ListVarPackagesProgress progress)
         {
-            _output.WriteAndReset($"Scanning packages... {progress.Packages} scanned: {progress.CurrentPackage}");
+            Output.WriteAndReset($"Scanning packages... {progress.Packages} scanned: {progress.CurrentPackage}");
         }
+    }
+
+    public interface IListVarPackagesOperation : IOperation
+    {
+        Task<IList<VarPackage>> ExecuteAsync(string vam);
     }
 }

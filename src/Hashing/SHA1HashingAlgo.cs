@@ -1,13 +1,8 @@
 using System;
 using System.Security.Cryptography;
 
-namespace Varbsorb
+namespace Varbsorb.Hashing
 {
-    public interface IHashingAlgo : IDisposable
-    {
-        string GetHash(byte[] bytes);
-    }
-
     public class SHA1HashingAlgo : IHashingAlgo
     {
         private readonly SHA1 _sha1 = SHA1.Create();

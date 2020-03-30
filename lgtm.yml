@@ -1,0 +1,8 @@
+path_classifiers:
+  test:
+    - "tests/**/*.cs"
+extraction:
+  csharp:
+    index:
+      dotnet:
+        version: 3.1.3

@@ -8,11 +8,6 @@ using Varbsorb.Models;
 
 namespace Varbsorb.Operations
 {
-    public interface IListScenesOperation : IOperation
-    {
-        Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files);
-    }
-
     public class ListScenesOperation : OperationBase, IListScenesOperation
     {
         private static readonly Regex _findFilesFastRegex = new Regex(
@@ -44,12 +39,6 @@ namespace Varbsorb.Operations
                     foreach (var reference in potentialSceneReferences)
                     {
                         if (reference.Contains(":")) continue;
-                        if(reference.EndsWith(".cs")){
-                            var temp = filesIndex.Where(k => k.Value.Extension == ".cs").ToList();
-                        }
-                        if(reference.EndsWith(".cslist") && reference.Contains("timeline")){
-                            var temp = filesIndex.Where(k => k.Value.Extension == ".cslist").ToList();
-                        }
                         if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(sceneFolder, reference)), out var f1))
                         {
                             references.Add(f1);
@@ -65,7 +54,7 @@ namespace Varbsorb.Operations
                 }
             }
 
-            _output.WriteLine($"Found {files.Count} files in the Saves and Custom folders.");
+            Output.WriteLine($"Found {files.Count} files in the Saves and Custom folders.");
 
             return scenes;
         }
@@ -79,7 +68,12 @@ namespace Varbsorb.Operations
 
         private void ReportProgress(ListScenesProgress progress)
         {
-            _output.WriteAndReset($"Parsing scenes... {progress.ScenesProcessed} / {progress.TotalScenes} ({progress.ScenesProcessed / (float)progress.TotalScenes * 100:0}%): {progress.Current}");
+            Output.WriteAndReset($"Parsing scenes... {progress.ScenesProcessed} / {progress.TotalScenes} ({progress.ScenesProcessed / (float)progress.TotalScenes * 100:0}%): {progress.Current}");
         }
+    }
+
+    public interface IListScenesOperation : IOperation
+    {
+        Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files);
     }
 }

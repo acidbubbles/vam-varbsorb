@@ -1,13 +1,14 @@
 ﻿using System.IO.Abstractions;
 using System.Threading.Tasks;
 using Autofac;
+using Varbsorb.Hashing;
 using Varbsorb.Operations;
 
 namespace Varbsorb
 {
-    class Program
+    public class Program
     {
-        static async Task Main(string vam, bool noop)
+        private static async Task Main(string vam, bool noop)
         {
             var container = Configure();
             var runtime = container.Resolve<Varbsorber>();

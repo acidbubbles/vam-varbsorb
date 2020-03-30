@@ -2,15 +2,11 @@
 using System.IO.Abstractions;
 using System.Linq;
 using System.Threading.Tasks;
+using Varbsorb.Hashing;
 using Varbsorb.Models;
 
 namespace Varbsorb.Operations
 {
-    public interface IMatchFilesToPackagesOperation : IOperation
-    {
-        Task<IList<FreeFilePackageMatch>> ExecuteAsync(IList<VarPackage> packages, IList<FreeFile> freeFiles);
-    }
-
     public class MatchFilesToPackagesOperation : OperationBase, IMatchFilesToPackagesOperation
     {
         private readonly IFileSystem _fs;
@@ -73,7 +69,7 @@ namespace Varbsorb.Operations
                 }
             }
 
-            _output.WriteLine($"Found {matches.Count} matching files.");
+            Output.WriteLine($"Found {matches.Count} matching files.");
 
             return matches;
         }
@@ -86,7 +82,12 @@ namespace Varbsorb.Operations
 
         private void ReportProgress(MatchFilesProgress progress)
         {
-            _output.WriteAndReset($"Matching packages to files... {progress.PackagesComplete} / {progress.PackagesTotal} ({progress.PackagesComplete / (float)progress.PackagesTotal * 100:0}%)");
+            Output.WriteAndReset($"Matching packages to files... {progress.PackagesComplete} / {progress.PackagesTotal} ({progress.PackagesComplete / (float)progress.PackagesTotal * 100:0}%)");
         }
+    }
+
+    public interface IMatchFilesToPackagesOperation : IOperation
+    {
+        Task<IList<FreeFilePackageMatch>> ExecuteAsync(IList<VarPackage> packages, IList<FreeFile> freeFiles);
     }
 }

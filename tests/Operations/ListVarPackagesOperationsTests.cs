@@ -5,12 +5,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
+using Varbsorb.Hashing;
 
 namespace Varbsorb.Operations
 {
     public class ListVarPackagesOperationsTests
     {
-        private const string VamPath = @"C:\Vam";
+        private const string _vamPath = @"C:\Vam";
+
         private Mock<IConsoleOutput> _consoleOutput;
         private MockFileSystem _fs;
 
@@ -24,13 +26,13 @@ namespace Varbsorb.Operations
         [Test]
         public async Task CanExecute()
         {
-            _fs.AddFile(@$"{VamPath}\AddonPackages\Author.Package.1.var", new MockFileData(CreateFakeZip()));
+            _fs.AddFile(@$"{_vamPath}\AddonPackages\Author.Package.1.var", new MockFileData(CreateFakeZip()));
             var op = new ListVarPackagesOperation(_consoleOutput.Object, _fs, new SHA1HashingAlgo());
 
-            var files = await op.ExecuteAsync(VamPath);
+            var files = await op.ExecuteAsync(_vamPath);
 
             Assert.That(files.Select(f => f.Path), Is.EqualTo(new[]{
-                @$"{VamPath}\AddonPackages\Author.Package.1.var",
+                @$"{_vamPath}\AddonPackages\Author.Package.1.var",
             }));
             Assert.That(files[0].Files.Select(f => $"{f.LocalPath}:{f.Hash}"), Is.EqualTo(new[]{
                 @"Custom\Scripts\Author\Script.cslist:caaf6584e2785eaab5abe6403e87ad159e99304d",

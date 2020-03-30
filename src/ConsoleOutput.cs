@@ -2,17 +2,8 @@ using System;
 
 namespace Varbsorb
 {
-    public interface IConsoleOutput
-    {
-        bool CursorVisible { get; set; }
-
-        void WriteLine(string text);
-        void WriteAndReset(string text);
-    }
-
     public class ConsoleOutput : IConsoleOutput
     {
-
         public bool CursorVisible { get => Console.CursorVisible; set => Console.CursorVisible = value; }
 
         public ConsoleOutput()
@@ -32,5 +23,13 @@ namespace Varbsorb
             Console.Write(text);
             Console.SetCursorPosition(0, Console.CursorTop);
         }
+    }
+
+    public interface IConsoleOutput
+    {
+        bool CursorVisible { get; set; }
+
+        void WriteLine(string text);
+        void WriteAndReset(string text);
     }
 }
