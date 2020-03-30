@@ -8,8 +8,6 @@ Get rid of your files that are available in a .var file.
 
 Download from the [Releases](https://github.com/acidbubbles/vam-varbsorb/releases), and extract somewhere on your machine.
 
-You will also need the [.NET Core 3.1 runtime](https://dotnet.microsoft.com/download/dotnet-core/3.1).
-
 In a command line:
 
 ```bash
