@@ -58,12 +58,12 @@ namespace Varbsorb.Operations
                 foreach (var cslistRef in await _fs.File.ReadAllLinesAsync(cslist.Path))
                 {
                     if (string.IsNullOrWhiteSpace(cslistRef)) continue;
-                    if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(cslistFolder, cslistRef)), out var f1))
+                    if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(cslistFolder, cslistRef).RelativeTo(vam)), out var f1))
                     {
                         cslist.Children.Add(f1);
                         filesToRemove.Add(f1);
                     }
-                    else if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(vam, cslistRef)), out var f2))
+                    else if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(vam, cslistRef).RelativeTo(vam)), out var f2))
                     {
                         cslist.Children.Add(f2);
                         filesToRemove.Add(f2);

@@ -16,9 +16,9 @@ namespace Varbsorb.Operations
     public class ListScenesOperation : OperationBase, IListScenesOperation
     {
         private static readonly Regex _findFilesFastRegex = new Regex(
-            "\"(?<path>[^\":]+\\.[a-zA-Z]{3,6})\"",
-            RegexOptions.Compiled | RegexOptions.Multiline,
-            TimeSpan.FromSeconds(5));
+            ": ?\"(?<path>[^\"]+\\.[a-zA-Z]{3,6})\"",
+            RegexOptions.Compiled | RegexOptions.ExplicitCapture,
+            TimeSpan.FromSeconds(10));
         private readonly IFileSystem _fs;
 
         public ListScenesOperation(IConsoleOutput output, IFileSystem fs)
@@ -43,11 +43,18 @@ namespace Varbsorb.Operations
                     var references = new List<FreeFile>();
                     foreach (var reference in potentialSceneReferences)
                     {
-                        if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(sceneFolder, reference)), out var f1))
+                        if (reference.Contains(":")) continue;
+                        if(reference.EndsWith(".cs")){
+                            var temp = filesIndex.Where(k => k.Value.Extension == ".cs").ToList();
+                        }
+                        if(reference.EndsWith(".cslist") && reference.Contains("timeline")){
+                            var temp = filesIndex.Where(k => k.Value.Extension == ".cslist").ToList();
+                        }
+                        if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(sceneFolder, reference).RelativeTo(vam)), out var f1))
                         {
                             references.Add(f1);
                         }
-                        else if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(vam, reference)), out var f2))
+                        else if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(vam, reference).RelativeTo(vam)), out var f2))
                         {
                             references.Add(f2);
                         }
