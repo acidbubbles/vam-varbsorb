@@ -5,7 +5,6 @@
     <AssemblyName>varbsorb</AssemblyName>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <DefaultNamespace>Varbsorb</DefaultNamespace>
-    <PublishTrimmed>true</PublishTrimmed>
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
 
