@@ -21,18 +21,13 @@ namespace Varbsorb
 
             var varFiles = await _operationsFactory.Get<IListVarPackagesOperation>().ExecuteAsync(vam);
             var freeFiles = await _operationsFactory.Get<IListFilesOperation>().ExecuteAsync(vam);
+            var scenes = await _operationsFactory.Get<IListScenesOperation>().ExecuteAsync(vam, freeFiles);
             var matches = await _operationsFactory.Get<IMatchFilesToPackagesOperation>().ExecuteAsync(varFiles, freeFiles);
             _output.WriteLine($"Completed contents listing: found {matches.Count} matches in {varFiles.Count} var packages, {freeFiles.Count} free files.");
             foreach (var match in matches.GroupBy(m => m.Package))
             {
-                _output.WriteLine($"Package {match.Key} matched {match.SelectMany(m => m.FreeFiles).Count()} files");
-                foreach (var one in match)
-                {
-                    foreach (var file in one.FreeFiles)
-                    {
-                        _output.WriteLine($"  {file.LocalPath}");
-                    }
-                }
+                var matchedFiles = match.SelectMany(m => m.FreeFiles).ToList();
+                _output.WriteLine($"Package {match.Key} matched {matchedFiles.Count()} files used in {scenes.Count(s => s.References.Any(r => matchedFiles.Contains(r)))} scenes.");
             }
         }
     }

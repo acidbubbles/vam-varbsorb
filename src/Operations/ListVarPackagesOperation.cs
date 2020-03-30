@@ -29,6 +29,7 @@ namespace Varbsorb.Operations
             var packages = new List<VarPackage>();
             using (var reporter = new ProgressReporter<ListVarPackagesProgress>(StartProgress, ReportProgress, CompleteProgress))
             {
+                var packagesScanned = 0;
                 foreach (var file in _fs.Directory.GetFiles(_fs.Path.Combine(vam, "AddonPackages"), "*.var"))
                 {
                     var package = new VarPackage
@@ -47,6 +48,8 @@ namespace Varbsorb.Operations
                     }
                     if (package.Files.Count > 0)
                         packages.Add(package);
+
+                    reporter.Report(new ListVarPackagesProgress { Packages = ++packagesScanned, CurrentPackage = package.Name.Filename });
                 }
             }
 
@@ -80,7 +83,7 @@ namespace Varbsorb.Operations
 
         private void ReportProgress(ListVarPackagesProgress progress)
         {
-            _output.WriteAndReset($"Scanning... {progress.Files} files discovered in {progress.Packages} packages: {progress.CurrentPackage}");
+            _output.WriteAndReset($"Scanning packages... {progress.Packages} scanned: {progress.CurrentPackage}");
         }
     }
 }

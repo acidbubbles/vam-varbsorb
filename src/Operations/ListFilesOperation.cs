@@ -39,39 +39,38 @@ namespace Varbsorb.Operations
                     .Tap(f => reporter.Report(new ListFilesProgress { Folder = _fs.Path.GetDirectoryName(f.Path), Files = ++counter }))
                 );
 
-                var filesToRemove = new List<FreeFile>();
-                var filesIndex = files.Where(f => f.Extension == ".cs").ToDictionary(f => f.Path, f => f);
-                foreach (var cslist in files.Where(f => f.Extension == ".cslist"))
-                {
-                    cslist.Children = new List<FreeFile>();
-                    var cslistFolder = _fs.Path.GetDirectoryName(cslist.Path);
-                    foreach (var cslistRef in await _fs.File.ReadAllLinesAsync(cslist.Path))
-                    {
-                        if (string.IsNullOrWhiteSpace(cslistRef)) continue;
-                        {
-                            var fromRelativePath = _fs.Path.GetFullPath(_fs.Path.Combine(cslistFolder, cslistRef));
-                            if (filesIndex.TryGetValue(fromRelativePath, out var found))
-                            {
-                                cslist.Children.Add(found);
-                                filesToRemove.Add(found);
-                            }
-                        }
-                        {
-                            var fromVamPath = _fs.Path.GetFullPath(_fs.Path.Combine(vam, cslistRef));
-                            if (filesIndex.TryGetValue(fromVamPath, out var found))
-                            {
-                                cslist.Children.Add(found);
-                                filesToRemove.Add(found);
-                            }
-                        }
-                    }
-                }
-                filesToRemove.ForEach(f => files.Remove(f));
+                await GroupCslistRefs(vam, files);
             }
 
             _output.WriteLine($"Found {files.Count} files in the Saves and Custom folders.");
 
             return files;
+        }
+
+        private async Task GroupCslistRefs(string vam, List<FreeFile> files)
+        {
+            var filesToRemove = new List<FreeFile>();
+            var filesIndex = files.Where(f => f.Extension == ".cs").ToDictionary(f => f.Path, f => f);
+            foreach (var cslist in files.Where(f => f.Extension == ".cslist"))
+            {
+                cslist.Children = new List<FreeFile>();
+                var cslistFolder = _fs.Path.GetDirectoryName(cslist.Path);
+                foreach (var cslistRef in await _fs.File.ReadAllLinesAsync(cslist.Path))
+                {
+                    if (string.IsNullOrWhiteSpace(cslistRef)) continue;
+                    if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(cslistFolder, cslistRef)), out var f1))
+                    {
+                        cslist.Children.Add(f1);
+                        filesToRemove.Add(f1);
+                    }
+                    else if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(vam, cslistRef)), out var f2))
+                    {
+                        cslist.Children.Add(f2);
+                        filesToRemove.Add(f2);
+                    }
+                }
+            }
+            filesToRemove.ForEach(f => files.Remove(f));
         }
 
         public class ListFilesProgress

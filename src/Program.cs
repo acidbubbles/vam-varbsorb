@@ -23,6 +23,7 @@ namespace Varbsorb
             builder.RegisterType<SHA1HashingAlgo>().As<IHashingAlgo>();
             builder.RegisterType<ListFilesOperation>().As<IListFilesOperation>();
             builder.RegisterType<MatchFilesToPackagesOperation>().As<IMatchFilesToPackagesOperation>();
+            builder.RegisterType<ListScenesOperation>().As<IListScenesOperation>();
             builder.RegisterType<OperationsFactory>().As<IOperationsFactory>();
             builder.RegisterType<Varbsorber>();
             return builder.Build();
