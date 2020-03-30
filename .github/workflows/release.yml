@@ -21,8 +21,8 @@ jobs:
     - name: Get the version
       id: get_version
       run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
+    - name: Package
+      run: dotnet package --configuration Release --no-restore
     - name: Zip the release package
       id: zip
       run: |
