@@ -20,20 +20,21 @@ jobs:
       run: dotnet restore -r win10-x64
     - name: Get the version
       id: get_version
-      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      run: echo "::set-output $($env:GITHUB_REF.Substring(11))"
+      shell: powershell
     - name: Publish x64
-      run: dotnet publish --configuration Release --no-restore -r win10-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=true
+      run: dotnet publish --configuration Release --no-restore -r win10-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:Version=${{ steps.get_version.outputs.VERSION }}
     - name: Zip the release package
       id: zip
       run: |
         cd src/bin/Release/netcoreapp3.1/publish
-        7zip a varbsorb-x64.zip ./*
+        7zip a varbsorb-x64-v${{ steps.get_version.outputs.VERSION }}.zip ./*
     - name: GitHub release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
         draft: true
-        files: src/bin/Release/netcoreapp3.1/publish/varbsorb-x64.zip
+        files: src/bin/Release/netcoreapp3.1/publish/*.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
  
