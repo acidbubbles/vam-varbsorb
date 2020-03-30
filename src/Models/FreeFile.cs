@@ -4,6 +4,7 @@ namespace Varbsorb
     {
         public string Path { get; set; }
         public string LocalPath { get; set; }
+        public string Hash { get; set; }
 
         public FreeFile(string vam, string path)
         {

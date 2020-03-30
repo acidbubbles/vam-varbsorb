@@ -7,7 +7,7 @@ namespace Varbsorb
 {
     public class ProgressReporter<T> : IProgress<T>, IDisposable
     {
-        public const long ReportEveryTicks = 50 * TimeSpan.TicksPerMillisecond;
+        public const long ReportEveryTicks = 10 * TimeSpan.TicksPerMillisecond;
         private readonly object _sync = new object();
         private readonly BlockingCollection<T> _queue = new BlockingCollection<T>(1);
         private readonly Stopwatch _stopwatch = new Stopwatch();
@@ -45,7 +45,7 @@ namespace Varbsorb
             {
                 lock (_sync)
                 {
-                    if (_nextReport > _stopwatch.ElapsedTicks)
+                    if (_stopwatch.ElapsedTicks > _nextReport)
                     {
                         _receive(item);
                         _nextReport = _stopwatch.ElapsedTicks + ReportEveryTicks;

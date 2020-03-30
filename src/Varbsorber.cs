@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Varbsorb.Operations;
 
 namespace Varbsorb
@@ -20,6 +21,10 @@ namespace Varbsorb
             var freeFiles = await _operationsFactory.Get<IListFilesOperation>().ExecuteAsync(vam);
             var matches = await _operationsFactory.Get<IMatchFilesToPackagesOperation>().ExecuteAsync(varFiles, freeFiles);
             _output.WriteLine($"Completed contents listing: found {matches.Count} matches in {varFiles.Count} var packages, {freeFiles.Count} free files.");
+            foreach(var match in matches.GroupBy(m => m.Package))
+            {
+                _output.WriteLine($"Package {match.Key} matched {match.SelectMany(m => m.FreeFiles).Count()} files");
+            }
         }
     }
 }

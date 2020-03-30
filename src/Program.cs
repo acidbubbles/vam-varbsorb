@@ -20,6 +20,7 @@ namespace Varbsorb
             builder.RegisterType<ConsoleOutput>().As<IConsoleOutput>();
             builder.RegisterType<FileSystem>().As<IFileSystem>();
             builder.RegisterType<ListVarPackagesOperation>().As<IListVarPackagesOperation>();
+            builder.RegisterType<SHA1HashingAlgo>().As<IHashingAlgo>();
             builder.RegisterType<ListFilesOperation>().As<IListFilesOperation>();
             builder.RegisterType<MatchFilesToPackagesOperation>().As<IMatchFilesToPackagesOperation>();
             builder.RegisterType<OperationsFactory>().As<IOperationsFactory>();

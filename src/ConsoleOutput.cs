@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 
 namespace Varbsorb
 {
@@ -27,7 +26,10 @@ namespace Varbsorb
 
         public void WriteAndReset(string text)
         {
-            Console.Write(text.PadRight(Console.BufferWidth));
+            var width = Console.BufferWidth - 1;
+            if (text.Length > width) text = text.Substring(0, width);
+            else if (text.Length < width) text = text.PadRight(width);
+            Console.Write(text);
             Console.SetCursorPosition(0, Console.CursorTop);
         }
     }

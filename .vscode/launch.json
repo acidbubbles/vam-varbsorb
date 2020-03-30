@@ -26,6 +26,7 @@
 		{
 			"id": "vam",
             "type": "promptString",
+            "default": "F:\\Games\\VaM",
 			"description": "Virt-A-Mate install path"
 		}
 	]

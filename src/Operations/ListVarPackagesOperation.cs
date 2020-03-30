@@ -14,38 +14,59 @@ namespace Varbsorb.Operations
     public class ListVarPackagesOperation : OperationBase, IListVarPackagesOperation
     {
         private readonly IFileSystem _fs;
+        private readonly IHashingAlgo _hashingAlgo;
 
-        public ListVarPackagesOperation(IConsoleOutput output, IFileSystem fs)
+        public ListVarPackagesOperation(IConsoleOutput output, IFileSystem fs, IHashingAlgo hashingAlgo)
             : base(output)
         {
             _fs = fs;
+            _hashingAlgo = hashingAlgo;
         }
 
-        public Task<IList<VarPackage>> ExecuteAsync(string vam)
+        public async Task<IList<VarPackage>> ExecuteAsync(string vam)
         {
             var packages = new List<VarPackage>();
             using (var reporter = new ProgressReporter<ListVarPackagesProgress>(StartProgress, ReportProgress, CompleteProgress))
             {
                 foreach (var file in _fs.Directory.GetFiles(_fs.Path.Combine(vam, "AddonPackages"), "*.var"))
                 {
-                    var package = new VarPackage { Path = file };
+                    var package = new VarPackage
+                    {
+                        Name = new VarPackageName(_fs.Path.GetFileName(file)),
+                        Path = file
+                    };
                     using var stream = _fs.File.OpenRead(file);
                     using var archive = new ZipArchive(stream);
                     foreach (var entry in archive.Entries)
                     {
-                        if(entry.FullName.EndsWith(@"/")) continue;
-                        if(entry.FullName == "meta.json") continue;
-                        var packageFile = new VarPackageFile { LocalPath = entry.FullName.Replace('/', '\\') };
+                        if (entry.FullName.EndsWith(@"/")) continue;
+                        if (entry.FullName == "meta.json") continue;
+                        var packageFile = await ReadPackageFileAsync(entry);
                         package.Files.Add(packageFile);
                     }
-                    if(package.Files.Count > 0)
+                    if (package.Files.Count > 0)
                         packages.Add(package);
                 }
             }
 
             _output.WriteLine($"Found {packages.Count} packages in the AddonPackages folder.");
 
-            return Task.FromResult((IList<VarPackage>)packages);
+            return packages;
+        }
+
+        private async Task<VarPackageFile> ReadPackageFileAsync(ZipArchiveEntry entry)
+        {
+            var packageFile = new VarPackageFile
+            {
+                LocalPath = entry.FullName.Replace('/', '\\')
+            };
+            using var entryMemoryStream = new MemoryStream();
+            using (var entryStream = entry.Open())
+            {
+                await entryStream.CopyToAsync(entryMemoryStream);
+            }
+            packageFile.Hash = _hashingAlgo.GetHash(entryMemoryStream.ToArray());
+            return packageFile;
         }
 
         public class ListVarPackagesProgress

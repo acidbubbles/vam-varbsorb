@@ -6,6 +6,6 @@ namespace Varbsorb
     {
         public VarPackage Package { get; set; }
         public VarPackageFile PackageFile { get; set; }
-        public FreeFile FreeFile { get; set; }
+        public IList<FreeFile> FreeFiles { get; set; }
     }
 }
