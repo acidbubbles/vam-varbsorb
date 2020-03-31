@@ -36,6 +36,7 @@ namespace Varbsorb.Operations
                     var potentialSceneReferences = _findFilesFastRegex.Matches(potentialSceneJson).Where(m => m.Success).Select(m => m.Groups["path"]);
                     var sceneFolder = _fs.Path.GetDirectoryName(potentialScene.Path);
                     var references = new List<SceneReference>();
+                    var missing = new List<string>();
                     foreach (var reference in potentialSceneReferences)
                     {
                         if (!reference.Success) continue;
@@ -50,9 +51,13 @@ namespace Varbsorb.Operations
                         {
                             references.Add(new SceneReference(f2, reference.Index, reference.Length));
                         }
+                        else
+                        {
+                            missing.Add(refPath);
+                        }
                     }
                     if (references.Count > 0)
-                        scenes.Add(new SceneFile(potentialScene, references));
+                        scenes.Add(new SceneFile(potentialScene, references, missing));
                     reporter.Report(new ListScenesProgress(++scenesScanned, potentialScenes.Count, potentialScene.FilenameLower));
                 }
             }

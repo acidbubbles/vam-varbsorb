@@ -6,11 +6,13 @@ namespace Varbsorb.Models
     {
         public FreeFile File { get; set; }
         public IList<SceneReference> References { get; }
+        public IList<string> Missing { get; }
 
-        public SceneFile(FreeFile file, IList<SceneReference> references)
+        public SceneFile(FreeFile file, IList<SceneReference> references, IList<string> missing)
         {
             File = file;
             References = references;
+            Missing = missing;
         }
     }
 }

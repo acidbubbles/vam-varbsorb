@@ -1,7 +1,6 @@
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
-using Moq;
 using NUnit.Framework;
 
 namespace Varbsorb.Operations

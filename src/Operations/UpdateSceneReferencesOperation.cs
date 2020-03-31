@@ -20,7 +20,7 @@ namespace Varbsorb.Operations
 
         public async Task<IList<FreeFile>> ExecuteAsync(IList<SceneFile> scenes, IList<FreeFilePackageMatch> matches)
         {
-            var freed = new List<FreeFile>();
+            var freed = new HashSet<FreeFile>();
             var matchesIndex = matches.SelectMany(m => m.FreeFiles.SelectMany(ff => ff.SelfAndChildren()).Select(ff => (m, ff))).ToDictionary(x => x.ff, x => (file: x.ff, match: x.m));
             using (var reporter = new ProgressReporter<UpdateScenesProgress>(StartProgress, ReportProgress, CompleteProgress))
             {
@@ -35,6 +35,7 @@ namespace Varbsorb.Operations
                             var sb = await sceneJsonTask.Value;
                             sb.Remove(sceneRef.Index, sceneRef.Length);
                             sb.Insert(sceneRef.Index, $"{match.match.Package.Name.Author}.{match.match.Package.Name.Name}.{match.match.Package.Name.Version}:/{match.match.PackageFile.LocalPath.Replace('\\', '/')}");
+                            freed.Add(match.file);
                         }
                     }
                     if (sceneJsonTask.IsValueCreated)
@@ -49,7 +50,7 @@ namespace Varbsorb.Operations
 
             Output.WriteLine($"Found {matches.Count} matching files.");
 
-            return freed;
+            return freed.ToList();
         }
 
         public class UpdateScenesProgress
