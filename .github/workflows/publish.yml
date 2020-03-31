@@ -1,4 +1,4 @@
-name: Package
+name: Publish
 
 on:
   push:
@@ -18,6 +18,8 @@ jobs:
         dotnet-version: 3.1.101
     - name: Install dependencies
       run: dotnet restore -r win10-x64
+    - name: Install software
+      run: choco install codecov -y
     - name: Get the version
       id: get_version
       run: echo "::set-output name=VERSION::$($env:GITHUB_REF.Substring(11))"
@@ -32,4 +34,10 @@ jobs:
         files: src/bin/Release/netcoreapp3.1/win10-x64/publish/*.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Run tests
+      run: dotnet test --collect:"XPlat Code Coverage"
+      shell: powershell
+    - name: Publish test coverage
+      run: codecov -f coverage.xml -t $env:CODECOV_TOKEN
+      shell: powershell
  
