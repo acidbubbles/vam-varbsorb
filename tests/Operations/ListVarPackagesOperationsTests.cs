@@ -28,7 +28,7 @@ namespace Varbsorb.Operations
             }));
         }
 
-        private byte[] CreateFakeZip()
+        private static byte[] CreateFakeZip()
         {
             using var ms = new MemoryStream();
             using var archive = new ZipArchive(ms, ZipArchiveMode.Create, true);

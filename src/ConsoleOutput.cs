@@ -6,10 +6,6 @@ namespace Varbsorb
     {
         public bool CursorVisible { get => Console.CursorVisible; set => Console.CursorVisible = value; }
 
-        public ConsoleOutput()
-        {
-        }
-
         public void WriteLine(string text)
         {
             Console.WriteLine(text);
