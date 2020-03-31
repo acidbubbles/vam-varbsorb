@@ -18,8 +18,9 @@ namespace Varbsorb
             _operationsFactory = operationsFactory;
         }
 
-        public async Task ExecuteAsync(string vam, bool noop)
+        public async Task ExecuteAsync(string vam, bool deleteUnused, bool noop)
         {
+            if (string.IsNullOrWhiteSpace(vam)) throw new VarbsorberException("The vam parameter is required (please specify the Virt-A-Mate installation folder)");
             if (vam.EndsWith('/') || vam.EndsWith('\\')) vam = vam[0..^1];
 
             var sw = Stopwatch.StartNew();

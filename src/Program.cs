@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System;
+using System.IO.Abstractions;
 using System.Threading.Tasks;
 using Autofac;
 using Varbsorb.Hashing;
@@ -8,11 +9,26 @@ namespace Varbsorb
 {
     public class Program
     {
-        private static async Task Main(string vam, bool noop)
+        /// <summary>
+        /// Varsborb: Clean your Virt-A-Mate install folder of duplicates found in var files.
+        /// </summary>
+        /// <param name="vam">The Virt-A-Mate install folder.</param>
+        /// <param name="deleteUnused">Delete non-scene files in the Saves folder that are not referenced by anything.</param>
+        /// <param name="noop">Do not actually delete or write anything, just print the result.</param>
+        private static async Task<int> Main(string vam, bool deleteUnused = false, bool noop = false)
         {
             var container = Configure();
             var runtime = container.Resolve<Varbsorber>();
-            await runtime.ExecuteAsync(vam, noop);
+            try
+            {
+                await runtime.ExecuteAsync(vam, deleteUnused, noop);
+                return 0;
+            }
+            catch (VarbsorberException exc)
+            {
+                Console.Error.WriteLine(exc.Message);
+            }
+            return 1;
         }
 
         private static IContainer Configure()
