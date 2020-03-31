@@ -41,6 +41,7 @@ namespace Varbsorb.Operations
                         if (!reference.Success) continue;
                         var refPath = reference.Value;
                         if (refPath.Contains(":")) continue;
+                        refPath = MigrateLegacyPaths(refPath);
                         if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(sceneFolder, refPath)), out var f1))
                         {
                             references.Add(new SceneReference(f1, reference.Index, reference.Length));
@@ -59,6 +60,15 @@ namespace Varbsorb.Operations
             Output.WriteLine($"Found {files.Count} files in the Saves and Custom folders.");
 
             return scenes;
+        }
+
+        private static string MigrateLegacyPaths(string refPath)
+        {
+            if (refPath.StartsWith(@"Saves\Scripts\", StringComparison.OrdinalIgnoreCase)) return @"Custom\Scripts\" + refPath.Substring(@"Saves\Scripts\".Length);
+            if (refPath.StartsWith(@"Saves\Assets\", StringComparison.OrdinalIgnoreCase)) return @"Custom\Assets\" + refPath.Substring(@"Saves\Assets\".Length);
+            if (refPath.StartsWith(@"Import\morphs\", StringComparison.OrdinalIgnoreCase)) return @"Custom\Atom\Person\Morphs\" + refPath.Substring(@"Import\morphs\".Length);
+            if (refPath.StartsWith(@"Textures\", StringComparison.OrdinalIgnoreCase)) return @"Custom\Atom\Person\Textures\" + refPath.Substring(@"Textures\".Length);
+            return refPath;
         }
 
         public class ListScenesProgress

@@ -12,7 +12,8 @@ namespace Varbsorb
 
         public static string Normalize(this string path)
         {
-            return path.Replace('/', '\\');
+            path = path.Replace('/', '\\');
+            return path;
         }
     }
 }
