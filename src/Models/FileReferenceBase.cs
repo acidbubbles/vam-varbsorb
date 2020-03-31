@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace Varbsorb.Models
 {
     public abstract class FileReferenceBase
@@ -5,6 +7,12 @@ namespace Varbsorb.Models
         public string LocalPath { get; set; }
         public string FilenameLower { get; set; }
         public string Extension { get; set; }
-        public string Hash { get; set; }
+
+        protected FileReferenceBase(string localPath)
+        {
+            LocalPath = localPath;
+            FilenameLower = Path.GetFileName(localPath).ToLowerInvariant();
+            Extension = Path.GetExtension(FilenameLower);
+        }
     }
 }

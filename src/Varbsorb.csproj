@@ -6,6 +6,7 @@
     <RuntimeIdentifiers>win10-x64</RuntimeIdentifiers>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <DefaultNamespace>Varbsorb</DefaultNamespace>
+    <Nullable>enable</Nullable>
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
 

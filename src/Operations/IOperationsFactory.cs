@@ -3,6 +3,6 @@ namespace Varbsorb.Operations
     public interface IOperationsFactory
     {
         T Get<T>()
-            where T : IOperation;
+            where T : notnull, IOperation;
     }
 }

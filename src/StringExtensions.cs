@@ -9,5 +9,10 @@ namespace Varbsorb
             if (!path.StartsWith(root, StringComparison.InvariantCultureIgnoreCase)) throw new InvalidOperationException($"Path '{path}' does not start with '{root}'");
             return path.Substring(root.Length + 1);
         }
+
+        public static string Normalize(this string path)
+        {
+            return path.Replace('/', '\\');
+        }
     }
 }

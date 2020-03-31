@@ -25,12 +25,12 @@ namespace Varbsorb.Operations
                 var counter = 0;
                 files.AddRange(_fs.Directory
                     .EnumerateFiles(_fs.Path.Combine(vam, "Custom"), "*.*", SearchOption.AllDirectories)
-                    .Select(f => new FreeFile(f, f.RelativeTo(vam), _fs.Path.GetFileName(f).ToLowerInvariant(), _fs.Path.GetExtension(f).ToLowerInvariant()))
-                    .Tap(f => reporter.Report(new ListFilesProgress { Folder = _fs.Path.GetDirectoryName(f.Path), Files = ++counter })));
+                    .Select(f => new FreeFile(f, f.RelativeTo(vam)))
+                    .Tap(f => reporter.Report(new ListFilesProgress(_fs.Path.GetDirectoryName(f.Path), ++counter))));
                 files.AddRange(_fs.Directory
                     .EnumerateFiles(_fs.Path.Combine(vam, "Saves"), "*.*", SearchOption.AllDirectories)
-                    .Select(f => new FreeFile(f, f.RelativeTo(vam), _fs.Path.GetFileName(f).ToLowerInvariant(), _fs.Path.GetExtension(f).ToLowerInvariant()))
-                    .Tap(f => reporter.Report(new ListFilesProgress { Folder = _fs.Path.GetDirectoryName(f.Path), Files = ++counter })));
+                    .Select(f => new FreeFile(f, f.RelativeTo(vam)))
+                    .Tap(f => reporter.Report(new ListFilesProgress(_fs.Path.GetDirectoryName(f.Path), ++counter))));
 
                 await GroupCslistRefs(vam, files);
             }
@@ -68,8 +68,14 @@ namespace Varbsorb.Operations
 
         public class ListFilesProgress
         {
-            public int Files { get; set; }
-            public string Folder { get; set; }
+            public int Files { get; }
+            public string Folder { get; }
+
+            public ListFilesProgress(string folder, int files)
+            {
+                Folder = folder;
+                Files = files;
+            }
         }
 
         private void ReportProgress(ListFilesProgress progress)

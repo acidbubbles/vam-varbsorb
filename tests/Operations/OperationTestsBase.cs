@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using Moq;
@@ -22,14 +21,9 @@ namespace Varbsorb.Operations
             _fs = new MockFileSystem();
         }
 
-        protected IList<FreeFile> GivenFiles(params string[] files)
+        protected IList<FreeFile> GivenFiles(params string[] localPaths)
         {
-            return files.Select(f => new FreeFile(
-                 $@"{_vamPath}\{f}",
-                 f,
-                 Path.GetFileName(f).ToLowerInvariant(),
-                 Path.GetExtension(f)
-            )).ToList();
+            return localPaths.Select(f => new FreeFile($@"{_vamPath}\{f}", f)).ToList();
         }
     }
 }

@@ -4,8 +4,15 @@ namespace Varbsorb.Models
 {
     public class FreeFilePackageMatch
     {
-        public VarPackage Package { get; set; }
-        public VarPackageFile PackageFile { get; set; }
-        public IList<FreeFile> FreeFiles { get; set; }
+        public VarPackage Package { get; }
+        public VarPackageFile PackageFile { get; }
+        public IList<FreeFile> FreeFiles { get; }
+
+        public FreeFilePackageMatch(VarPackage package, VarPackageFile packageFile, IList<FreeFile> freeFiles)
+        {
+            Package = package;
+            PackageFile = packageFile;
+            FreeFiles = freeFiles;
+        }
     }
 }

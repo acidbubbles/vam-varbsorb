@@ -5,11 +5,12 @@ namespace Varbsorb.Models
     public class SceneFile
     {
         public FreeFile File { get; set; }
-        public List<SceneReference> References { get; set; }
+        public IList<SceneReference> References { get; }
 
-        public SceneFile(FreeFile file)
+        public SceneFile(FreeFile file, IList<SceneReference> references)
         {
             File = file;
+            References = references;
         }
     }
 }

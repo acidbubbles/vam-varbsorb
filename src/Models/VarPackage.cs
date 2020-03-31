@@ -6,9 +6,16 @@ namespace Varbsorb.Models
 {
     public class VarPackage
     {
-        public VarPackageName Name { get; set; }
-        public string Path { get; set; }
-        public List<VarPackageFile> Files { get; } = new List<VarPackageFile>();
+        public VarPackageName Name { get; }
+        public string Path { get; }
+        public IList<VarPackageFile> Files { get; }
+
+        public VarPackage(VarPackageName name, string path, IList<VarPackageFile> files)
+        {
+            Name = name;
+            Path = path;
+            Files = files;
+        }
 
         public override string ToString()
         {
@@ -47,11 +54,12 @@ namespace Varbsorb.Models
 
     public class VarPackageFile : FileReferenceBase
     {
-        public VarPackageFile(string localPath, string filenameLower, string extension)
+        public string Hash { get; }
+
+        public VarPackageFile(string localPath, string hash)
+            : base(localPath)
         {
-            LocalPath = localPath;
-            FilenameLower = filenameLower;
-            Extension = extension;
+            Hash = hash;
         }
     }
 }

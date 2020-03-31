@@ -59,12 +59,10 @@ namespace Varbsorb.Operations
                         if (matchedFreeFiles.Count == 0)
                             continue;
 
-                        matches.Add(new FreeFilePackageMatch
-                        {
-                            Package = package,
-                            PackageFile = packageFile,
-                            FreeFiles = matchedFreeFiles
-                        });
+                        matches.Add(new FreeFilePackageMatch(
+                            package,
+                            packageFile,
+                            matchedFreeFiles));
                     }
 
                     reporter.Report(new MatchFilesProgress { PackagesComplete = ++packagesComplete, PackagesTotal = packages.Count });

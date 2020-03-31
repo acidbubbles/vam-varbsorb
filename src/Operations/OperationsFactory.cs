@@ -12,7 +12,7 @@ namespace Varbsorb.Operations
         }
 
         public T Get<T>()
-            where T : IOperation
+            where T : notnull, IOperation
         {
             return _scope.Resolve<T>();
         }

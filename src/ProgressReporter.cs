@@ -6,6 +6,7 @@ using System.Threading;
 namespace Varbsorb
 {
     public class ProgressReporter<T> : IProgress<T>, IDisposable
+        where T : notnull
     {
         public const long ReportEveryTicks = 10 * TimeSpan.TicksPerMillisecond;
         private readonly object _sync = new object();

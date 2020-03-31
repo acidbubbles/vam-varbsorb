@@ -28,11 +28,8 @@ namespace Varbsorb.Operations
                 var packagesScanned = 0;
                 foreach (var file in _fs.Directory.GetFiles(_fs.Path.Combine(vam, "AddonPackages"), "*.var"))
                 {
-                    var package = new VarPackage
-                    {
-                        Name = new VarPackageName(_fs.Path.GetFileName(file)),
-                        Path = file
-                    };
+                    var filename = _fs.Path.GetFileName(file);
+                    var files = new List<VarPackageFile>();
                     using var stream = _fs.File.OpenRead(file);
                     using var archive = new ZipArchive(stream);
                     foreach (var entry in archive.Entries)
@@ -40,12 +37,12 @@ namespace Varbsorb.Operations
                         if (entry.FullName.EndsWith(@"/")) continue;
                         if (entry.FullName == "meta.json") continue;
                         var packageFile = await ReadPackageFileAsync(entry);
-                        package.Files.Add(packageFile);
+                        files.Add(packageFile);
                     }
-                    if (package.Files.Count > 0)
-                        packages.Add(package);
+                    if (files.Count > 0)
+                        packages.Add(new VarPackage(new VarPackageName(filename), file, files));
 
-                    reporter.Report(new ListVarPackagesProgress { Packages = ++packagesScanned, CurrentPackage = package.Name.Filename });
+                    reporter.Report(new ListVarPackagesProgress(++packagesScanned, filename));
                 }
             }
 
@@ -56,29 +53,30 @@ namespace Varbsorb.Operations
 
         private async Task<VarPackageFile> ReadPackageFileAsync(ZipArchiveEntry entry)
         {
-            var packageFile = new VarPackageFile(
-                entry.FullName.Replace('/', '\\'),
-                _fs.Path.GetFileName(entry.FullName.ToLowerInvariant()),
-                _fs.Path.GetExtension(entry.FullName).ToLowerInvariant());
             using var entryMemoryStream = new MemoryStream();
             using (var entryStream = entry.Open())
             {
                 await entryStream.CopyToAsync(entryMemoryStream);
             }
-            packageFile.Hash = _hashingAlgo.GetHash(entryMemoryStream.ToArray());
-            return packageFile;
+            var hash = _hashingAlgo.GetHash(entryMemoryStream.ToArray());
+            return new VarPackageFile(entry.FullName.Normalize(), hash);
         }
 
         public class ListVarPackagesProgress
         {
-            public int Packages { get; set; }
-            public int Files { get; set; }
+            public ListVarPackagesProgress(int packagesScanned, string filename)
+            {
+                PackagesScanned = packagesScanned;
+                CurrentPackage = filename;
+            }
+
+            public int PackagesScanned { get; set; }
             public string CurrentPackage { get; set; }
         }
 
         private void ReportProgress(ListVarPackagesProgress progress)
         {
-            Output.WriteAndReset($"Scanning packages... {progress.Packages} scanned: {progress.CurrentPackage}");
+            Output.WriteAndReset($"Scanning packages... {progress.PackagesScanned} scanned: {progress.CurrentPackage}");
         }
     }
 

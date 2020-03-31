@@ -43,16 +43,16 @@ namespace Varbsorb.Operations
                         if (refPath.Contains(":")) continue;
                         if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(sceneFolder, refPath)), out var f1))
                         {
-                            references.Add(new SceneReference { File = f1, Index = reference.Index, Length = reference.Length });
+                            references.Add(new SceneReference(f1, reference.Index, reference.Length));
                         }
                         else if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(vam, refPath)), out var f2))
                         {
-                            references.Add(new SceneReference { File = f2, Index = reference.Index, Length = reference.Length });
+                            references.Add(new SceneReference(f2, reference.Index, reference.Length));
                         }
                     }
                     if (references.Count > 0)
-                        scenes.Add(new SceneFile(potentialScene) { References = references });
-                    reporter.Report(new ListScenesProgress { ScenesProcessed = ++scenesScanned, TotalScenes = potentialScenes.Count, Current = potentialScene.FilenameLower });
+                        scenes.Add(new SceneFile(potentialScene, references));
+                    reporter.Report(new ListScenesProgress(++scenesScanned, potentialScenes.Count, potentialScene.FilenameLower));
                 }
             }
 
@@ -63,9 +63,16 @@ namespace Varbsorb.Operations
 
         public class ListScenesProgress
         {
-            public int ScenesProcessed { get; set; }
-            public int TotalScenes { get; set; }
-            public string Current { get; set; }
+            public int ScenesProcessed { get; }
+            public int TotalScenes { get; }
+            public string Current { get; }
+
+            public ListScenesProgress(int scenesProcessed, int totalScenes, string current)
+            {
+                ScenesProcessed = scenesProcessed;
+                TotalScenes = totalScenes;
+                Current = current;
+            }
         }
 
         private void ReportProgress(ListScenesProgress progress)
