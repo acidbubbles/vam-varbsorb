@@ -19,7 +19,7 @@ namespace Varbsorb.Operations
 
             var files = await op.ExecuteAsync(_vamPath);
 
-            Assert.That(files.Select(f => f.Path).OrderBy(f => f), Is.EqualTo(new[]{
+            Assert.That(files.Select(f => f.Path.Windows()).OrderBy(f => f), Is.EqualTo(new[]{
                 @$"{_vamPath}\Custom\Scripts\Author\Package\Plugin.cslist",
                 @$"{_vamPath}\Custom\Scripts\Author\Script.cs",
                 @$"{_vamPath}\Saves\Author\Scene.json",

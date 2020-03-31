@@ -19,7 +19,8 @@ namespace Varbsorb.Operations
                 {
                     new SceneReference(scriptFile, 7, 25),
                     new SceneReference(scriptFile, 43, 10),
-                }
+                },
+                new List<string>()
             )).ToList();
             var matches = new List<FreeFilePackageMatch>
             {
