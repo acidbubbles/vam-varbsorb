@@ -24,8 +24,11 @@ jobs:
       id: get_version
       run: echo "::set-output name=VERSION::$($env:GITHUB_REF.Substring(11))"
       shell: powershell
+    - name: Run tests
+      run: dotnet test --collect:"XPlat Code Coverage" -c Release --no-restore
+      shell: powershell
     - name: Publish x64
-      run: dotnet publish src/Varbsorb.csproj --configuration Release --no-restore -r win10-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true /p:UseAppHost=true /p:Version=${{ steps.get_version.outputs.VERSION }}
+      run: dotnet publish src/Varbsorb.csproj -c Release --no-restore -r win10-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true /p:UseAppHost=true /p:Version=${{ steps.get_version.outputs.VERSION }}
     - name: GitHub release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
@@ -34,10 +37,7 @@ jobs:
         files: src/bin/Release/netcoreapp3.1/win10-x64/publish/*.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Run tests
-      run: dotnet test --collect:"XPlat Code Coverage"
-      shell: powershell
     - name: Publish test coverage
-      run: codecov -f coverage.xml -t $env:CODECOV_TOKEN
+      run: codecov -f "$(ls .\tests\TestResults\*\coverage.cobertura.xml)" -t ${{ secrets.CODECOV_TOKEN }}
       shell: powershell
  
