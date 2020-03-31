@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Varbsorb.Models
 {
-    public class SceneFile : FileReferenceBase
+    public class SceneFile
     {
         public FreeFile File { get; set; }
         public List<SceneReference> References { get; set; }

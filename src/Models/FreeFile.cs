@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Varbsorb.Models
 {
@@ -14,6 +16,12 @@ namespace Varbsorb.Models
             LocalPath = localPath;
             FilenameLower = filenameLower;
             Extension = extension;
+        }
+
+        internal IEnumerable<FreeFile> SelfAndChildren()
+        {
+            if (Children == null) return new[] { this };
+            return Children.Concat(new[] { this });
         }
     }
 }

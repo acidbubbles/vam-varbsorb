@@ -1,6 +1,4 @@
-using System.IO;
 using System.IO.Abstractions.TestingHelpers;
-using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using Moq;
@@ -8,22 +6,8 @@ using NUnit.Framework;
 
 namespace Varbsorb.Operations
 {
-    public class
-ListFilesOperationsTests
-
+    public class ListFilesOperationsTests : OperationTestsBase
     {
-        private const string _vamPath = @"C:\Vam";
-
-        private Mock<IConsoleOutput> _consoleOutput;
-        private MockFileSystem _fs;
-
-        [SetUp]
-        public void Setup()
-        {
-            _consoleOutput = new Mock<IConsoleOutput>(MockBehavior.Loose);
-            _fs = new MockFileSystem();
-        }
-
         [Test]
         public async Task CanExecute()
         {

@@ -1,28 +1,13 @@
-using System.Collections.Generic;
-using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
-using Varbsorb.Models;
 
 namespace Varbsorb.Operations
 {
-    public class ListScenesOperationsTests
+    public class ListScenesOperationsTests : OperationTestsBase
     {
-        private const string _vamPath = @"C:\Vam";
-
-        private Mock<IConsoleOutput> _consoleOutput;
-        private MockFileSystem _fs;
-
-        [SetUp]
-        public void Setup()
-        {
-            _consoleOutput = new Mock<IConsoleOutput>(MockBehavior.Loose);
-            _fs = new MockFileSystem();
-        }
-
         [Test]
         public async Task CanExecute()
         {
@@ -48,16 +33,6 @@ namespace Varbsorb.Operations
                 @"Custom\Scripts\ScriptAbs.cs[65-27]",
                 @"Saves\scene\party\ScriptRel.cs[27-12]",
             }));
-        }
-
-        private IList<FreeFile> GivenFiles(params string[] files)
-        {
-            return files.Select(f => new FreeFile(
-                 $@"{_vamPath}\{f}",
-                 f,
-                 Path.GetFileName(f).ToLowerInvariant(),
-                 Path.GetExtension(f)
-            )).ToList();
         }
     }
 }

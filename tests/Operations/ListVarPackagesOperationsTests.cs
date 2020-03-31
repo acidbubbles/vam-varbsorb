@@ -9,20 +9,8 @@ using Varbsorb.Hashing;
 
 namespace Varbsorb.Operations
 {
-    public class ListVarPackagesOperationsTests
+    public class ListVarPackagesOperationsTests : OperationTestsBase
     {
-        private const string _vamPath = @"C:\Vam";
-
-        private Mock<IConsoleOutput> _consoleOutput;
-        private MockFileSystem _fs;
-
-        [SetUp]
-        public void Setup()
-        {
-            _consoleOutput = new Mock<IConsoleOutput>(MockBehavior.Loose);
-            _fs = new MockFileSystem();
-        }
-
         [Test]
         public async Task CanExecute()
         {

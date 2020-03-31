@@ -27,15 +27,13 @@ namespace Varbsorb.Models
 
         public VarPackageName(string filename)
         {
-            Filename = filename;
             var match = _extract.Match(filename);
+            if (!match.Success) throw new VarbsorberException($"Invalid var package name: '{filename}'");
 
-            if (match.Success)
-            {
-                Author = match.Groups["Name"].Value;
-                Name = match.Groups["Name"].Value;
-                Version = int.Parse(match.Groups["Version"].Value);
-            }
+            Filename = filename;
+            Author = match.Groups["Author"].Value;
+            Name = match.Groups["Name"].Value;
+            Version = int.Parse(match.Groups["Version"].Value);
         }
 
         public override string ToString()
