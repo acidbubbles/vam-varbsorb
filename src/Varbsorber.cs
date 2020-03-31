@@ -44,6 +44,8 @@ namespace Varbsorb
                     // TODO: Before we can use this, we must check for .wav files referenced by scripts for example.
                     // TODO: Only delete unused stuff in Saves, and delete in Custom only if a matching var exists.
                     // TODO: Delete empty folders
+                    // TODO: Morph matches can be deleted directly
+                    // TODO: When we delete a reference to a clothing item for example, make sure to delete all files that the var contains
                     filesToDelete.Add(file);
                     if (verbose) _output.WriteLine($"- {file.LocalPath} in {match.Key.Name.Filename} (used in {scenes.Count(s => s.References.Any(r => r.File == file))} scenes)");
                 }

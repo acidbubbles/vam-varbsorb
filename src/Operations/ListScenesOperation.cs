@@ -11,7 +11,7 @@ namespace Varbsorb.Operations
     public class ListScenesOperation : OperationBase, IListScenesOperation
     {
         private static readonly Regex _findFilesFastRegex = new Regex(
-            ": ?\"(?<path>[^\"]+\\.[a-zA-Z]{2,6})\"",
+            "\"(assetUrl|audioClip|url|uid|sceneFilePath|plugin#[0-9+]|act1Target[0-9]+ValueName)\" ?: ?\"(?<path>[^\"]+\\.[a-zA-Z]{2,6})\"",
             RegexOptions.Compiled | RegexOptions.ExplicitCapture,
             TimeSpan.FromSeconds(10));
         private readonly IFileSystem _fs;
@@ -25,7 +25,7 @@ namespace Varbsorb.Operations
         public async Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files)
         {
             var scenes = new List<SceneFile>();
-            var filesIndex = files.Where(f => f.Extension != ".json").ToDictionary(f => f.Path, f => f);
+            var filesIndex = files.ToDictionary(f => f.Path, f => f);
             using (var reporter = new ProgressReporter<ListScenesProgress>(StartProgress, ReportProgress, CompleteProgress))
             {
                 var scenesScanned = 0;
