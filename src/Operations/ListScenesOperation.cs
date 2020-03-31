@@ -33,19 +33,21 @@ namespace Varbsorb.Operations
                 foreach (var potentialScene in potentialScenes)
                 {
                     var potentialSceneJson = await _fs.File.ReadAllTextAsync(potentialScene.Path);
-                    var potentialSceneReferences = _findFilesFastRegex.Matches(potentialSceneJson).Where(m => m.Success).Select(m => m.Groups["path"].Value).ToList();
+                    var potentialSceneReferences = _findFilesFastRegex.Matches(potentialSceneJson).Where(m => m.Success).Select(m => m.Groups["path"]);
                     var sceneFolder = _fs.Path.GetDirectoryName(potentialScene.Path);
-                    var references = new List<FreeFile>();
+                    var references = new List<SceneReference>();
                     foreach (var reference in potentialSceneReferences)
                     {
-                        if (reference.Contains(":")) continue;
-                        if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(sceneFolder, reference)), out var f1))
+                        if (!reference.Success) continue;
+                        var refPath = reference.Value;
+                        if (refPath.Contains(":")) continue;
+                        if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(sceneFolder, refPath)), out var f1))
                         {
-                            references.Add(f1);
+                            references.Add(new SceneReference { File = f1, Index = reference.Index, Length = reference.Length });
                         }
-                        else if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(vam, reference)), out var f2))
+                        else if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(vam, refPath)), out var f2))
                         {
-                            references.Add(f2);
+                            references.Add(new SceneReference { File = f2, Index = reference.Index, Length = reference.Length });
                         }
                     }
                     if (references.Count > 0)

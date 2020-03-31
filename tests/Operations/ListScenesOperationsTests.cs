@@ -44,9 +44,9 @@ namespace Varbsorb.Operations
 
             Assert.That(scenes.Count, Is.EqualTo(1));
 
-            Assert.That(scenes[0].References.Select(f => f.LocalPath).OrderBy(f => f), Is.EqualTo(new[]{
-                @"Custom\Scripts\ScriptAbs.cs",
-                @"Saves\scene\party\ScriptRel.cs",
+            Assert.That(scenes[0].References.Select(f => $"{f.File.LocalPath}[{f.Index}-{f.Length}]").OrderBy(f => f), Is.EqualTo(new[]{
+                @"Custom\Scripts\ScriptAbs.cs[65-27]",
+                @"Saves\scene\party\ScriptRel.cs[27-12]",
             }));
         }
 

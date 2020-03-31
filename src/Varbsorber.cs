@@ -18,7 +18,7 @@ namespace Varbsorb
             _operationsFactory = operationsFactory;
         }
 
-        public async Task ExecuteAsync(string vam, bool deleteUnused, bool noop)
+        public async Task ExecuteAsync(string vam, bool noop)
         {
             if (string.IsNullOrWhiteSpace(vam)) throw new VarbsorberException("The vam parameter is required (please specify the Virt-A-Mate installation folder)");
             if (vam.EndsWith('/') || vam.EndsWith('\\')) vam = vam[0..^1];
@@ -37,7 +37,7 @@ namespace Varbsorb
                 foreach (var file in match.SelectMany(m => m.FreeFiles).SelectMany(ff => ff.Children != null ? ff.Children.Concat(new[] { ff }) : new[] { ff }))
                 {
                     filesToDelete.Add(file);
-                    _output.WriteLine($"- {file.LocalPath} in {match.Key.Name.Filename} (used in {scenes.Count(s => s.References.Contains(file))} scenes)");
+                    _output.WriteLine($"- {file.LocalPath} in {match.Key.Name.Filename} (used in {scenes.Count(s => s.References.Any(r => r.File == file))} scenes)");
                 }
             }
             _output.WriteLine($"Complete. Found {matches.Count} matches in {varFiles.Count} packages and {freeFiles.Count} files in {sw.Elapsed.Seconds:0.00} seconds. Estimated space saved: {filesToDelete.Sum(f => f.Size) / 1024f:0.00}MB.");
