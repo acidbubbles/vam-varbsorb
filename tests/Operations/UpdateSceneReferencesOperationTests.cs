@@ -13,14 +13,15 @@ namespace Varbsorb.Operations
         [Test]
         public async Task CanExecute()
         {
-            _fs.AddFile(@$"{_vamPath}\Saves\scene\MyScene.json", new MockFileData(@"{""id"":""Custom\Saves\scene\MyScene.json""}"));
+            _fs.AddFile(@$"{_vamPath}\Saves\scene\MyScene.json", new MockFileData(@"{""id"":""Custom\Scripts\Script1.cs"", ""path"":""Script1.cs""}"));
             var op = new UpdateSceneReferencesOperation(_consoleOutput.Object, _fs);
             var scriptFile = new FreeFile("", @"Custom\Scripts\MyScript.cs", "myscript.cs", ".cs");
             var scenes = GivenFiles(@"Saves\scene\MyScene.json").Select(f => new SceneFile(f)
             {
                 References = new List<SceneReference>
                 {
-                    new SceneReference{File = scriptFile, Index = 7, Length = 31}
+                    new SceneReference{File = scriptFile, Index = 7, Length = 25},
+                    new SceneReference{File = scriptFile, Index = 43, Length = 10},
                 }
             }).ToList();
             var matches = new List<FreeFilePackageMatch>
@@ -38,7 +39,7 @@ namespace Varbsorb.Operations
 
             var files = await op.ExecuteAsync(scenes, matches);
 
-            Assert.That(_fs.GetFile($@"{_vamPath}\Saves\scene\MyScene.json").TextContents, Is.EqualTo(@"{""id"":""Author.Name.1:/Custom/Scripts/MyScript.cs""}"));
+            Assert.That(_fs.GetFile($@"{_vamPath}\Saves\scene\MyScene.json").TextContents, Is.EqualTo(@"{""id"":""Author.Name.1:/Custom/Scripts/MyScript.cs"", ""path"":""Author.Name.1:/Custom/Scripts/MyScript.cs""}"));
         }
     }
 }

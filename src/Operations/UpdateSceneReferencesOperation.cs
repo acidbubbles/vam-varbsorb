@@ -28,9 +28,8 @@ namespace Varbsorb.Operations
                 foreach (var scene in scenes)
                 {
                     var sceneJsonTask = new Lazy<Task<StringBuilder>>(async () => new StringBuilder(await _fs.File.ReadAllTextAsync(scene.File.Path)));
-                    for (var i = scene.References.Count - 1; i >= 0; i--)
+                    foreach (var sceneRef in scene.References.OrderByDescending(r => r.Index))
                     {
-                        var sceneRef = scene.References[i];
                         if (matchesIndex.TryGetValue(sceneRef.File, out var match))
                         {
                             var sb = await sceneJsonTask.Value;
