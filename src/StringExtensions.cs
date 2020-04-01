@@ -10,10 +10,9 @@ namespace Varbsorb
             return path.Substring(root.Length + 1);
         }
 
-        public static string Normalize(this string path)
+        public static string NormalizePathSeparators(this string path)
         {
-            path = path.Replace('/', '\\');
-            return path;
+            return path.Replace('/', '\\');
         }
     }
 }

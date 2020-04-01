@@ -4,6 +4,7 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Varbsorb;
 using Varbsorb.Models;
 
 namespace Varbsorb.Operations
@@ -29,11 +30,12 @@ namespace Varbsorb.Operations
             using (var reporter = new ProgressReporter<ListScenesProgress>(StartProgress, ReportProgress, CompleteProgress))
             {
                 var scenesScanned = 0;
-                var potentialScenes = files.Where(f => f.Extension == ".json").ToList();
+                var potentialScenes = files
+                    .Where(f => f.Extension == ".json")
+                    .Where(f => !filter.IsFiltered(f.LocalPath))
+                    .ToList();
                 foreach (var potentialScene in potentialScenes)
                 {
-                    if (filter.IsFiltered(potentialScene.LocalPath)) continue;
-
                     var potentialSceneJson = await _fs.File.ReadAllTextAsync(potentialScene.Path);
                     var potentialSceneReferences = _findFilesFastRegex.Matches(potentialSceneJson).Where(m => m.Success).Select(m => m.Groups["path"]);
                     var sceneFolder = _fs.Path.GetDirectoryName(potentialScene.Path);
@@ -44,6 +46,7 @@ namespace Varbsorb.Operations
                         if (!reference.Success) continue;
                         var refPath = reference.Value;
                         if (refPath.Contains(":")) continue;
+                        refPath = refPath.NormalizePathSeparators();
                         refPath = MigrateLegacyPaths(refPath);
                         if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(sceneFolder, refPath)), out var f1))
                         {

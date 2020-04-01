@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Varbsorb.Models;
@@ -20,9 +21,8 @@ namespace Varbsorb
 
         public async Task ExecuteAsync(string vam, string[]? filters, bool verbose, bool warnings, bool noop)
         {
-            if (string.IsNullOrWhiteSpace(vam)) throw new VarbsorberException("The vam parameter is required (please specify the Virt-A-Mate installation folder)");
-            if (vam.EndsWith('/') || vam.EndsWith('\\')) vam = vam[0..^1];
-            var filter = Filter.From(filters);
+            vam = SanitizeVamRootFolder(vam);
+            var filter = BuildFilter(vam, filters);
 
             var sw = Stopwatch.StartNew();
 
@@ -58,7 +58,7 @@ namespace Varbsorb
                 foreach (var scene in errors)
                 {
                     _output.WriteLine($"{scene.Missing.Count} Errors in scene: {scene.File.LocalPath}");
-                    foreach (var brokenRef in scene.Missing)
+                    foreach (var brokenRef in scene.Missing.Distinct())
                     {
                         _output.WriteLine($"- {brokenRef}");
                     }
@@ -66,6 +66,25 @@ namespace Varbsorb
             }
 
             _output.WriteLine($"Complete. Found {matches.Count} matches in {varFiles.Count} packages and {freeFiles.Count} files in {sw.Elapsed.Seconds:0.00} seconds. Estimated space saved: {filesToDelete.Sum(f => f.Size) / 1024f / 1024f:0.00}MB.");
+        }
+
+        private static string SanitizeVamRootFolder(string vam)
+        {
+            if (string.IsNullOrWhiteSpace(vam)) throw new VarbsorberException("The vam parameter is required (please specify the Virt-A-Mate installation folder)");
+            if (vam.EndsWith('/') || vam.EndsWith('\\')) vam = vam[0..^1];
+            return vam;
+        }
+
+        private static IFilter BuildFilter(string vam, string[]? filters)
+        {
+            return Filter.From(filters.Select(f =>
+            {
+                if (!Path.IsPathFullyQualified(f)) f = Path.Combine(vam, f);
+                f = Path.GetFullPath(f);
+                if (!f.StartsWith(vam)) throw new VarbsorberException($"Filter '{f}' is not within the vam folder");
+                if (!f.StartsWith(Path.Combine(vam, "Saves"))) throw new VarbsorberException($"Filter '{f}' is not within the vam Saves folder");
+                return f.Substring(vam.Length + 1);
+            }).ToArray());
         }
     }
 }

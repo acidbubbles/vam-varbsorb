@@ -59,7 +59,7 @@ namespace Varbsorb.Operations
                 await entryStream.CopyToAsync(entryMemoryStream);
             }
             var hash = _hashingAlgo.GetHash(entryMemoryStream.ToArray());
-            return new VarPackageFile(entry.FullName.Normalize(), hash);
+            return new VarPackageFile(entry.FullName.NormalizePathSeparators(), hash);
         }
 
         public class ListVarPackagesProgress
