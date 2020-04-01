@@ -43,6 +43,7 @@ namespace Varbsorb
             builder.RegisterType<ListFilesOperation>().As<IListFilesOperation>();
             builder.RegisterType<MatchFilesToPackagesOperation>().As<IMatchFilesToPackagesOperation>();
             builder.RegisterType<ListScenesOperation>().As<IListScenesOperation>();
+            builder.RegisterType<ListUnusedFilesOperation>().As<IListUnusedFilesOperation>();
             builder.RegisterType<UpdateSceneReferencesOperation>().As<IUpdateSceneReferencesOperation>();
             builder.RegisterType<OperationsFactory>().As<IOperationsFactory>();
             builder.RegisterType<Varbsorber>();
