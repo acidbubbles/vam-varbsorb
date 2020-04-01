@@ -12,6 +12,7 @@ namespace Varbsorb.Operations
         public async Task CanExecute()
         {
             var scriptFile = new FreeFile("", @"Custom\Scripts\MyScript.cs");
+            var filteredFile = new FreeFile("", @"Saves\Filtered\FilteredScript.cs");
             var scriptListChild = new FreeFile("", @"Custom\Scripts\Complex\Child.cs");
             var scriptListFile = new FreeFile("", @"Custom\Scripts\Complex\Complex.cslist")
             {
@@ -27,7 +28,7 @@ namespace Varbsorb.Operations
             };
             var op = new ListUnusedFilesOperation(_consoleOutput.Object, _fs);
 
-            var result = await op.ExecuteAsync(matches);
+            var result = await op.ExecuteAsync(matches, new StringsFilter(new[] { @"Saves\Filtered" }));
 
             Assert.That(result.Select(f => f.LocalPath).OrderBy(f => f), Is.EqualTo(new[]
             {

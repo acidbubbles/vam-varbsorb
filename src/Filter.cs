@@ -4,11 +4,13 @@ namespace Varbsorb
 {
     public class Filter
     {
+        public static readonly IFilter None = new NoFilter();
+
         public static IFilter From(string[]? filters)
         {
-            if (filters == null) return new NoFilter();
+            if (filters == null) return None;
             var sanitized = filters.Where(f => !string.IsNullOrWhiteSpace(f)).ToArray();
-            if (sanitized.Length == 0) return new NoFilter();
+            if (sanitized.Length == 0) return None;
             return new StringsFilter(sanitized);
         }
     }
