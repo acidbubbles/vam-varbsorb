@@ -30,12 +30,13 @@ namespace Varbsorb
             var freeFiles = await _operationsFactory.Get<IListFilesOperation>().ExecuteAsync(vam);
             var scenes = await _operationsFactory.Get<IListScenesOperation>().ExecuteAsync(vam, freeFiles, filter);
             var matches = await _operationsFactory.Get<IMatchFilesToPackagesOperation>().ExecuteAsync(varFiles, freeFiles);
-            var filesToDelete = await _operationsFactory.Get<IListUnusedFilesOperation>().ExecuteAsync(matches);
+            var filesToDelete = await _operationsFactory.Get<IListUnusedFilesOperation>().ExecuteAsync(matches, filter);
             if (!noop)
             {
                 await _operationsFactory.Get<IUpdateSceneReferencesOperation>().ExecuteAsync(scenes, matches);
             }
 
+            PrintFilesToDelete(verbose, filesToDelete);
             PrintSceneWarnings(warnings, scenes);
 
             _output.WriteLine($"Complete. Found {matches.Count} matches in {varFiles.Count} packages and {freeFiles.Count} files in {sw.Elapsed.Seconds:0.00} seconds. {filesToDelete.Count} files can be deleted. Estimated space saved: {filesToDelete.Sum(f => f.Size) / 1024f / 1024f:0.00}MB.");
@@ -58,6 +59,16 @@ namespace Varbsorb
                 if (!f.StartsWith(Path.Combine(vam, "Saves"))) throw new VarbsorberException($"Filter '{f}' is not within the vam Saves folder");
                 return f.Substring(vam.Length + 1);
             }).ToArray());
+        }
+
+        private void PrintFilesToDelete(bool verbose, ISet<FreeFile> filesToDelete)
+        {
+            if (verbose)
+            {
+                _output.WriteLine("Files to be deleted:");
+                foreach (var file in filesToDelete)
+                    _output.WriteLine($"- {file.LocalPath}");
+            }
         }
 
         private void PrintSceneWarnings(bool warnings, IList<SceneFile> scenes)

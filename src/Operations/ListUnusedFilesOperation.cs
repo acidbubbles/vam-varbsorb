@@ -13,13 +13,13 @@ namespace Varbsorb.Operations
         {
         }
 
-        public Task<ISet<FreeFile>> ExecuteAsync(IList<FreeFilePackageMatch> matches)
+        public Task<ISet<FreeFile>> ExecuteAsync(IList<FreeFilePackageMatch> matches, IFilter filter)
         {
             var files = new HashSet<FreeFile>();
 
             foreach (var match in matches)
             {
-                foreach (var file in match.FreeFiles.SelectMany(f => f.SelfAndChildren()))
+                foreach (var file in match.FreeFiles.Where(f => !filter.IsFiltered(f.LocalPath)).SelectMany(f => f.SelfAndChildren()))
                 {
                     files.Add(file);
                 }
@@ -31,6 +31,6 @@ namespace Varbsorb.Operations
 
     public interface IListUnusedFilesOperation : IOperation
     {
-        Task<ISet<FreeFile>> ExecuteAsync(IList<FreeFilePackageMatch> matches);
+        Task<ISet<FreeFile>> ExecuteAsync(IList<FreeFilePackageMatch> matches, IFilter filter);
     }
 }
