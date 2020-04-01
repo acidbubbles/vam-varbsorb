@@ -16,6 +16,9 @@ namespace Varbsorb.Operations
                 ""plugin#3"": ""Custom\Scripts\Missing.cs"",
                 ""assetUrl"": ""Saves\Scripts\Legacy.cs"",
             }".Replace("\r\n", "\n")));
+            _fs.AddFile(@$"{_vamPath}\Saves\scene\ignored\anything.json", new MockFileData(@"{
+                ""uid"" : ""filtered.cs"",
+            }".Replace("\r\n", "\n")));
             _fs.AddFile(@$"{_vamPath}\Saves\scene\party\ScriptRel.cs", new MockFileData("public class ScriptRel : MVRScript {}"));
             _fs.AddFile(@$"{_vamPath}\Custom\Scripts\ScriptAbs.cs", new MockFileData("public class ScriptAbs : MVRScript {}"));
             var op = new ListScenesOperation(_consoleOutput.Object, _fs);
@@ -26,7 +29,7 @@ namespace Varbsorb.Operations
                 @"Custom\Scripts\Legacy.cs"
             );
 
-            var scenes = await op.ExecuteAsync(_vamPath, files);
+            var scenes = await op.ExecuteAsync(_vamPath, files, new StringsFilter(new[] { @"Saves\scene\ignored\" }));
 
             Assert.That(scenes.Count, Is.EqualTo(1));
 
@@ -35,6 +38,11 @@ namespace Varbsorb.Operations
                 @"Custom\Scripts\Legacy.cs[182-23]",
                 @"Custom\Scripts\ScriptAbs.cs[66-27]",
                 @"Saves\scene\party\ScriptRel.cs[27-12]",
+            }));
+
+            Assert.That(scenes[0].Missing.OrderBy(f => f), Is.EqualTo(new[]
+            {
+                @"Custom\Scripts\Missing.cs",
             }));
         }
     }

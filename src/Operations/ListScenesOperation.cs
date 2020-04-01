@@ -22,7 +22,7 @@ namespace Varbsorb.Operations
             _fs = fs;
         }
 
-        public async Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files)
+        public async Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter)
         {
             var scenes = new List<SceneFile>();
             var filesIndex = files.ToDictionary(f => f.Path, f => f);
@@ -32,6 +32,8 @@ namespace Varbsorb.Operations
                 var potentialScenes = files.Where(f => f.Extension == ".json").ToList();
                 foreach (var potentialScene in potentialScenes)
                 {
+                    if (filter.IsFiltered(potentialScene.LocalPath)) continue;
+
                     var potentialSceneJson = await _fs.File.ReadAllTextAsync(potentialScene.Path);
                     var potentialSceneReferences = _findFilesFastRegex.Matches(potentialSceneJson).Where(m => m.Success).Select(m => m.Groups["path"]);
                     var sceneFolder = _fs.Path.GetDirectoryName(potentialScene.Path);
@@ -98,6 +100,6 @@ namespace Varbsorb.Operations
 
     public interface IListScenesOperation : IOperation
     {
-        Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files);
+        Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter);
     }
 }

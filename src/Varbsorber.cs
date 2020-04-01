@@ -18,16 +18,17 @@ namespace Varbsorb
             _operationsFactory = operationsFactory;
         }
 
-        public async Task ExecuteAsync(string vam, bool verbose, bool warnings, bool noop)
+        public async Task ExecuteAsync(string vam, string[]? filters, bool verbose, bool warnings, bool noop)
         {
             if (string.IsNullOrWhiteSpace(vam)) throw new VarbsorberException("The vam parameter is required (please specify the Virt-A-Mate installation folder)");
             if (vam.EndsWith('/') || vam.EndsWith('\\')) vam = vam[0..^1];
+            var filter = Filter.From(filters);
 
             var sw = Stopwatch.StartNew();
 
             var varFiles = await _operationsFactory.Get<IListVarPackagesOperation>().ExecuteAsync(vam);
             var freeFiles = await _operationsFactory.Get<IListFilesOperation>().ExecuteAsync(vam);
-            var scenes = await _operationsFactory.Get<IListScenesOperation>().ExecuteAsync(vam, freeFiles);
+            var scenes = await _operationsFactory.Get<IListScenesOperation>().ExecuteAsync(vam, freeFiles, filter);
             var matches = await _operationsFactory.Get<IMatchFilesToPackagesOperation>().ExecuteAsync(varFiles, freeFiles);
             var filesToDelete = new HashSet<FreeFile>();
             if (!noop)
