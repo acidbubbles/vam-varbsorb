@@ -18,7 +18,13 @@ namespace Varbsorb
         /// <param name="verbose">Prints detailed output.</param>
         /// <param name="warnings">Prints broken scene references.</param>
         /// <param name="noop">Do not actually delete or write anything, just print the result.</param>
-        private static async Task<int> Main(string vam, string[]? include = null, string[]? exclude = null, bool verbose = false, bool warnings = false, bool noop = false)
+        private static async Task<int> Main(
+            string vam,
+            string[]? include = null,
+            string[]? exclude = null,
+            bool verbose = false,
+            bool warnings = false,
+            bool noop = false)
         {
             var container = Configure();
             var runtime = container.Resolve<Varbsorber>();

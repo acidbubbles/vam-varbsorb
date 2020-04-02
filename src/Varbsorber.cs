@@ -10,6 +10,9 @@ namespace Varbsorb
 {
     public class Varbsorber
     {
+        public const int MaxWarnings = 20;
+        public const int MaxVerbose = 100;
+
         private readonly IConsoleOutput _output;
         private readonly IOperationsFactory _operationsFactory;
 
@@ -23,8 +26,7 @@ namespace Varbsorb
         {
             return Filter.From(
                 include?.Select(f => SanitizeFilterPath(vam, f)).ToArray(),
-                exclude?.Select(f => SanitizeFilterPath(vam, f)).ToArray()
-            );
+                exclude?.Select(f => SanitizeFilterPath(vam, f)).ToArray());
         }
 
         public async Task ExecuteAsync(string vam, string[]? include, string[]? exclude, bool verbose, bool warnings, bool noop)
@@ -71,7 +73,7 @@ namespace Varbsorb
             if (verbose)
             {
                 _output.WriteLine("Files to be deleted:");
-                foreach (var file in filesToDelete)
+                foreach (var file in filesToDelete.Take(MaxVerbose))
                     _output.WriteLine($"- {file.LocalPath}");
             }
         }
@@ -81,7 +83,7 @@ namespace Varbsorb
             var errors = scenes.Where(s => s.Missing.Any()).ToList();
             if (errors.Count > 0 && warnings)
             {
-                foreach (var scene in errors)
+                foreach (var scene in errors.Take(MaxWarnings))
                 {
                     _output.WriteLine($"{scene.Missing.Count} Errors in scene: {scene.File.LocalPath}");
                     foreach (var brokenRef in scene.Missing.Distinct())

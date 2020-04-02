@@ -53,8 +53,8 @@ namespace Varbsorb
 
         public bool IsFiltered(string path)
         {
-            if (!_include.Any(f => path.StartsWith(f))) return false;
-            return _exclude.Any(f => path.StartsWith(f));
+            if (_exclude.Any(f => path.StartsWith(f))) return true;
+            return !_include.Any(f => path.StartsWith(f));
         }
     }
 

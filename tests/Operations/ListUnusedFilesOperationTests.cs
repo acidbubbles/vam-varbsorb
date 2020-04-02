@@ -28,7 +28,7 @@ namespace Varbsorb.Operations
             };
             var op = new ListUnusedFilesOperation(_consoleOutput.Object, _fs);
 
-            var result = await op.ExecuteAsync(matches, new IncludeFilter(new[] { @"Saves\Filtered" }));
+            var result = await op.ExecuteAsync(matches, new ExcludeFilter(new[] { @"Saves\Filtered" }));
 
             Assert.That(result.Select(f => f.LocalPath).OrderBy(f => f), Is.EqualTo(new[]
             {
