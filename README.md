@@ -14,6 +14,8 @@ In a command line:
 > varbsorb --vam C:\Vam
 ```
 
+This will scan your Virt-A-Mate `Saves` and `Custom` folders as well as the `.var` packages in your `AddonPackages` folder, find when a file exists in both (it ensures the exact same version is in both), updates the scene and deletes the files.
+
 Arguments:
 
 - `--vam`: The root path of Virt-A-Mate
@@ -30,6 +32,13 @@ This will delete files on your system. Varbsorb tries very hard to ensure it's a
 Folders starting with a `.` such as `.git` will not be scanned nor cleaned.
 
 When multiple var matches are found, the most recent and with the least files will be selected. The reasoning is if someone creates a var file with textures, but there's a package _for_ these textures, the latter is a better choice.
+
+## Roadmap
+
+- It would be fairly simple to find duplicates in the Saves and Custom folder and clean them up too.
+- It could find any scripts, morphs or textures in the Saves folder and migrate them to the Custom folder automatically.
+- Using parallelism this could be a few times faster.
+- Once Virt-A-Mate provides a service for var packages, we could potentially automatically download them.
 
 ## Contributing
 
