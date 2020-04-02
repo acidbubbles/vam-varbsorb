@@ -67,7 +67,7 @@ namespace Varbsorb.Operations
                 }
             }
 
-            Output.WriteLine($"Found {files.Count} files in the Saves and Custom folders.");
+            Output.WriteLine($"Found {files.Count} scenes.");
 
             return scenes;
         }
