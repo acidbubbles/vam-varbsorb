@@ -10,6 +10,8 @@ namespace Varbsorb.Operations
 {
     public class ListVarPackagesOperation : OperationBase, IListVarPackagesOperation
     {
+        protected override string Name => "Scan var packages";
+
         private readonly IFileSystem _fs;
         private readonly IHashingAlgo _hashingAlgo;
 
@@ -23,10 +25,11 @@ namespace Varbsorb.Operations
         public async Task<IList<VarPackage>> ExecuteAsync(string vam)
         {
             var packages = new List<VarPackage>();
-            using (var reporter = new ProgressReporter<ListVarPackagesProgress>(StartProgress, ReportProgress, CompleteProgress))
+            using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
                 var packagesScanned = 0;
-                foreach (var file in _fs.Directory.GetFiles(_fs.Path.Combine(vam, "AddonPackages"), "*.var"))
+                var packageFiles = _fs.Directory.GetFiles(_fs.Path.Combine(vam, "AddonPackages"), "*.var");
+                foreach (var file in packageFiles)
                 {
                     var filename = _fs.Path.GetFileName(file);
                     var files = new List<VarPackageFile>();
@@ -42,11 +45,11 @@ namespace Varbsorb.Operations
                     if (files.Count > 0)
                         packages.Add(new VarPackage(new VarPackageName(filename), file, files));
 
-                    reporter.Report(new ListVarPackagesProgress(++packagesScanned, filename));
+                    reporter.Report(new ProgressInfo(++packagesScanned, packageFiles.Length, filename));
                 }
             }
 
-            Output.WriteLine($"Found {packages.Count} packages in the AddonPackages folder.");
+            Output.WriteLine($"Scanned {packages.Count} packages.");
 
             return packages;
         }
@@ -60,23 +63,6 @@ namespace Varbsorb.Operations
             }
             var hash = _hashingAlgo.GetHash(entryMemoryStream.ToArray());
             return new VarPackageFile(entry.FullName.NormalizePathSeparators(), hash);
-        }
-
-        public class ListVarPackagesProgress
-        {
-            public ListVarPackagesProgress(int packagesScanned, string filename)
-            {
-                PackagesScanned = packagesScanned;
-                CurrentPackage = filename;
-            }
-
-            public int PackagesScanned { get; set; }
-            public string CurrentPackage { get; set; }
-        }
-
-        private void ReportProgress(ListVarPackagesProgress progress)
-        {
-            Output.WriteAndReset($"Scanning packages... {progress.PackagesScanned} scanned: {progress.CurrentPackage}");
         }
     }
 

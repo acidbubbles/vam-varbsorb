@@ -9,6 +9,7 @@ namespace Varbsorb.Operations
 {
     public class ListFilesOperation : OperationBase, IListFilesOperation
     {
+        protected override string Name => "Scan files";
         private readonly IFileSystem _fs;
 
         public ListFilesOperation(IConsoleOutput output, IFileSystem fs)
@@ -20,22 +21,22 @@ namespace Varbsorb.Operations
         public async Task<IList<FreeFile>> ExecuteAsync(string vam)
         {
             var files = new List<FreeFile>();
-            using (var reporter = new ProgressReporter<ListFilesProgress>(StartProgress, ReportProgress, CompleteProgress))
+            using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
                 var counter = 0;
                 files.AddRange(_fs.Directory
                     .EnumerateFiles(_fs.Path.Combine(vam, "Custom"), "*.*", SearchOption.AllDirectories)
                     .Select(f => new FreeFile(f, f.RelativeTo(vam)))
-                    .Tap(f => reporter.Report(new ListFilesProgress(_fs.Path.GetDirectoryName(f.Path), ++counter))));
+                    .Tap(f => reporter.Report(new ProgressInfo(++counter, 0, f.LocalPath))));
                 files.AddRange(_fs.Directory
                     .EnumerateFiles(_fs.Path.Combine(vam, "Saves"), "*.*", SearchOption.AllDirectories)
                     .Select(f => new FreeFile(f, f.RelativeTo(vam)))
-                    .Tap(f => reporter.Report(new ListFilesProgress(_fs.Path.GetDirectoryName(f.Path), ++counter))));
+                    .Tap(f => reporter.Report(new ProgressInfo(++counter, 0, f.LocalPath))));
 
                 await GroupCslistRefs(vam, files);
             }
 
-            Output.WriteLine($"Found {files.Count} files in the Saves and Custom folders.");
+            Output.WriteLine($"Scanned {files.Count} files.");
 
             return files;
         }
@@ -64,23 +65,6 @@ namespace Varbsorb.Operations
                 }
             }
             filesToRemove.ForEach(f => files.Remove(f));
-        }
-
-        public class ListFilesProgress
-        {
-            public int Files { get; }
-            public string Folder { get; }
-
-            public ListFilesProgress(string folder, int files)
-            {
-                Folder = folder;
-                Files = files;
-            }
-        }
-
-        private void ReportProgress(ListFilesProgress progress)
-        {
-            Output.WriteAndReset($"Scanning... {progress.Files} discovered: {progress.Folder}");
         }
     }
 

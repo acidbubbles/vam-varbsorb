@@ -9,6 +9,8 @@ namespace Varbsorb.Operations
 {
     public class MatchFilesToPackagesOperation : OperationBase, IMatchFilesToPackagesOperation
     {
+        protected override string Name => "Match packages to files";
+
         private readonly IFileSystem _fs;
         private readonly IHashingAlgo _hashingAlgo;
 
@@ -23,7 +25,7 @@ namespace Varbsorb.Operations
         {
             var freeFilesSet = freeFiles.GroupBy(ff => ff.FilenameLower).ToDictionary(f => f.Key, f => f.ToList());
             var matches = new List<FreeFilePackageMatch>();
-            using (var reporter = new ProgressReporter<MatchFilesProgress>(StartProgress, ReportProgress, CompleteProgress))
+            using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
                 var packagesComplete = 0;
                 foreach (var package in packages)
@@ -65,24 +67,13 @@ namespace Varbsorb.Operations
                             matchedFreeFiles));
                     }
 
-                    reporter.Report(new MatchFilesProgress { PackagesComplete = ++packagesComplete, PackagesTotal = packages.Count });
+                    reporter.Report(new ProgressInfo(++packagesComplete, packages.Count, package.Name.Filename));
                 }
             }
 
-            Output.WriteLine($"Found {matches.Count} matching files.");
+            Output.WriteLine($"Matched {matches.Count} files.");
 
             return matches;
-        }
-
-        public class MatchFilesProgress
-        {
-            public int PackagesComplete { get; set; }
-            public int PackagesTotal { get; set; }
-        }
-
-        private void ReportProgress(MatchFilesProgress progress)
-        {
-            Output.WriteAndReset($"Matching packages to files... {progress.PackagesComplete} / {progress.PackagesTotal} ({progress.PackagesComplete / (float)progress.PackagesTotal * 100:0}%)");
         }
     }
 

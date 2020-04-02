@@ -8,6 +8,8 @@ namespace Varbsorb.Operations
 {
     public class ListUnusedFilesOperation : OperationBase, IListUnusedFilesOperation
     {
+        protected override string Name => "Identify unused files";
+
         public ListUnusedFilesOperation(IConsoleOutput output, IFileSystem fs)
             : base(output)
         {
@@ -24,6 +26,8 @@ namespace Varbsorb.Operations
                     files.Add(file);
                 }
             }
+
+            Output.WriteLine($"Found {files.Count} unused files.");
 
             return Task.FromResult((ISet<FreeFile>)files);
         }

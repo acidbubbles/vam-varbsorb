@@ -10,6 +10,8 @@ namespace Varbsorb.Operations
 {
     public class UpdateSceneReferencesOperation : OperationBase, IUpdateSceneReferencesOperation
     {
+        protected override string Name => "Update scene references";
+
         private readonly IFileSystem _fs;
 
         public UpdateSceneReferencesOperation(IConsoleOutput output, IFileSystem fs)
@@ -22,7 +24,7 @@ namespace Varbsorb.Operations
         {
             var freed = new HashSet<FreeFile>();
             var matchesIndex = matches.SelectMany(m => m.FreeFiles.SelectMany(ff => ff.SelfAndChildren()).Select(ff => (m, ff))).ToDictionary(x => x.ff, x => (file: x.ff, match: x.m));
-            using (var reporter = new ProgressReporter<UpdateScenesProgress>(StartProgress, ReportProgress, CompleteProgress))
+            using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
                 var scenesProcessed = 0;
                 foreach (var scene in scenes)
@@ -44,24 +46,13 @@ namespace Varbsorb.Operations
                         await _fs.File.WriteAllTextAsync(scene.File.Path, sb.ToString());
                     }
 
-                    reporter.Report(new UpdateScenesProgress { ScenesProcessed = ++scenesProcessed, ScenesTotal = scenes.Count });
+                    reporter.Report(new ProgressInfo(++scenesProcessed, scenes.Count, scene.File.LocalPath));
                 }
             }
 
-            Output.WriteLine($"Found {matches.Count} matching files.");
+            Output.WriteLine($"Updated {matches.Count} scenes.");
 
             return freed.ToList();
-        }
-
-        public class UpdateScenesProgress
-        {
-            public int ScenesTotal { get; set; }
-            public int ScenesProcessed { get; set; }
-        }
-
-        private void ReportProgress(UpdateScenesProgress progress)
-        {
-            Output.WriteAndReset($"Updating scene references... {progress.ScenesProcessed} / {progress.ScenesTotal} ({progress.ScenesProcessed / (float)progress.ScenesTotal * 100:0}%)");
         }
     }
 

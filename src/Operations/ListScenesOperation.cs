@@ -4,13 +4,14 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Varbsorb;
 using Varbsorb.Models;
 
 namespace Varbsorb.Operations
 {
     public class ListScenesOperation : OperationBase, IListScenesOperation
     {
+        protected override string Name => "Scan scene references";
+
         private static readonly Regex _findFilesFastRegex = new Regex(
             "\"(assetUrl|audioClip|url|uid|sceneFilePath|plugin#[0-9+]|act1Target[0-9]+ValueName)\" ?: ?\"(?<path>[^\"]+\\.[a-zA-Z]{2,6})\"",
             RegexOptions.Compiled | RegexOptions.ExplicitCapture,
@@ -27,7 +28,7 @@ namespace Varbsorb.Operations
         {
             var scenes = new List<SceneFile>();
             var filesIndex = files.ToDictionary(f => f.Path, f => f);
-            using (var reporter = new ProgressReporter<ListScenesProgress>(StartProgress, ReportProgress, CompleteProgress))
+            using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
                 var scenesScanned = 0;
                 var potentialScenes = files
@@ -63,11 +64,11 @@ namespace Varbsorb.Operations
                     }
                     if (references.Count > 0)
                         scenes.Add(new SceneFile(potentialScene, references, missing));
-                    reporter.Report(new ListScenesProgress(++scenesScanned, potentialScenes.Count, potentialScene.FilenameLower));
+                    reporter.Report(new ProgressInfo(++scenesScanned, potentialScenes.Count, potentialScene.LocalPath));
                 }
             }
 
-            Output.WriteLine($"Found {files.Count} scenes.");
+            Output.WriteLine($"Scanned {files.Count} scenes.");
 
             return scenes;
         }
@@ -79,25 +80,6 @@ namespace Varbsorb.Operations
             if (refPath.StartsWith(@"Import\morphs\", StringComparison.OrdinalIgnoreCase)) return @"Custom\Atom\Person\Morphs\" + refPath.Substring(@"Import\morphs\".Length);
             if (refPath.StartsWith(@"Textures\", StringComparison.OrdinalIgnoreCase)) return @"Custom\Atom\Person\Textures\" + refPath.Substring(@"Textures\".Length);
             return refPath;
-        }
-
-        public class ListScenesProgress
-        {
-            public int ScenesProcessed { get; }
-            public int TotalScenes { get; }
-            public string Current { get; }
-
-            public ListScenesProgress(int scenesProcessed, int totalScenes, string current)
-            {
-                ScenesProcessed = scenesProcessed;
-                TotalScenes = totalScenes;
-                Current = current;
-            }
-        }
-
-        private void ReportProgress(ListScenesProgress progress)
-        {
-            Output.WriteAndReset($"Parsing scenes... {progress.ScenesProcessed} / {progress.TotalScenes} ({progress.ScenesProcessed / (float)progress.TotalScenes * 100:0}%): {progress.Current}");
         }
     }
 

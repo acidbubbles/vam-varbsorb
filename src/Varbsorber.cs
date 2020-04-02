@@ -49,7 +49,7 @@ namespace Varbsorb
             PrintFilesToDelete(verbose, filesToDelete);
             PrintSceneWarnings(warnings, scenes);
 
-            _output.WriteLine($"Complete. Found {matches.Count} matches in {varFiles.Count} packages and {freeFiles.Count} files in {sw.Elapsed.Seconds:0.00} seconds. {filesToDelete.Count} files can be deleted. Estimated space saved: {filesToDelete.Sum(f => f.Size) / 1024f / 1024f:0.00}MB.");
+            _output.WriteLine($"Cleanup complete. Found {matches.Count} matches out of {freeFiles.Count} files and {varFiles.Count} packages in {sw.Elapsed.Seconds:0.00} seconds. {filesToDelete.Count} files can be deleted. Estimated space saved: {filesToDelete.Sum(f => f.Size) / 1024f / 1024f:0.00}MB.");
         }
 
         private static string SanitizeVamRootFolder(string vam)
@@ -72,7 +72,7 @@ namespace Varbsorb
         {
             if (filesToDelete.Count > 0)
             {
-                _output.WriteLine($"Found {filesToDelete.Count} files that can be deleted.");
+                _output.WriteLine($"{filesToDelete.Count} files will be deleted.");
                 if (verbose)
                 {
                     foreach (var file in filesToDelete.Take(MaxVerbose))
