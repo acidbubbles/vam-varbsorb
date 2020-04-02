@@ -2,7 +2,7 @@
 
 ![Build](https://github.com/acidbubbles/vam-varbsorb/workflows/Build/badge.svg) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1b8474c95a0b4910a731c80f527d25da)](https://app.codacy.com/manual/acidbubbles/vam-varbsorb?utm_source=github.com&utm_medium=referral&utm_content=acidbubbles/vam-varbsorb&utm_campaign=Badge_Grade_Dashboard) [![codecov](https://codecov.io/gh/acidbubbles/vam-varbsorb/branch/master/graph/badge.svg)](https://codecov.io/gh/acidbubbles/vam-varbsorb) [![lgtm](https://img.shields.io/lgtm/alerts/g/acidbubbles/vam-varbsorb.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/acidbubbles/vam-varbsorb/alerts/)
 
-Get rid of your files that are available in a .var file.
+Get rid of Virt-A-Mate `Custom` and `Saves` files that have been made available in a .var file.
 
 ## Usage
 
@@ -14,7 +14,7 @@ In a command line:
 > varbsorb --vam C:\Vam
 ```
 
-This will scan your Virt-A-Mate `Saves` and `Custom` folders as well as the `.var` packages in your `AddonPackages` folder, find when a file exists in both (it ensures the exact same version is in both), updates the scene and deletes the files.
+This will scan your Virt-A-Mate `Saves` and `Custom` folders as well as the `.var` packages in your `AddonPackages` folder. When it finds a file that exists in both the AddonPackages var files and your Saves/Custom folder, it will update the scene and delete the duplicated files.
 
 Arguments:
 
@@ -29,9 +29,9 @@ Arguments:
 
 This will delete files on your system. Varbsorb tries very hard to ensure it's as safe as possible, but if you have symbolic links in your Saves or Custom folder, Varbsorb will follow them. You might want to make a backup of your Virt-A-Mate Saves and Custom folders, just in case (or add them to Git).
 
-Folders starting with a `.` such as `.git` will not be scanned nor cleaned.
+Folders starting with a `.` such as `.git` will not be cleaned.
 
-When multiple var matches are found, the most recent and with the least files will be selected. The reasoning is if someone creates a var file with textures, but there's a package _for_ these textures, the latter is a better choice.
+When multiple var version matches are found, the highest version will be selected. If multiple var packages are found, the one with the least files will be selected. The reasoning is if someone creates a var file with a look that contains morphs, textures and other things, but there's also a package that exists that only contains the textures, the latter is usually a better choice.
 
 ## Roadmap
 
