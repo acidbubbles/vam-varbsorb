@@ -70,11 +70,18 @@ namespace Varbsorb
 
         private void PrintFilesToDelete(bool verbose, ISet<FreeFile> filesToDelete)
         {
-            if (verbose)
+            if (filesToDelete.Count > 0)
             {
-                _output.WriteLine("Files to be deleted:");
-                foreach (var file in filesToDelete.Take(MaxVerbose))
-                    _output.WriteLine($"- {file.LocalPath}");
+                _output.WriteLine($"Found {filesToDelete.Count} files that can be deleted.");
+                if (verbose)
+                {
+                    foreach (var file in filesToDelete.Take(MaxVerbose))
+                        _output.WriteLine($"- {file.LocalPath}");
+                }
+            }
+            else
+            {
+                _output.WriteLine("Good news, there's nothing to delete!");
             }
         }
 
