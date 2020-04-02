@@ -19,22 +19,18 @@ namespace Varbsorb
             _operationsFactory = operationsFactory;
         }
 
-        public static IFilter BuildFilter(string vam, string[]? filters)
+        public static IFilter BuildFilter(string vam, string[]? include, string[]? exclude)
         {
-            return Filter.From(filters.Select(f =>
-            {
-                if (!Path.IsPathFullyQualified(f)) f = Path.Combine(vam, f);
-                f = Path.GetFullPath(f);
-                if (!f.StartsWith(vam)) throw new VarbsorberException($"Filter '{f}' is not within the vam folder");
-                if (!f.StartsWith(Path.Combine(vam, "Saves"))) throw new VarbsorberException($"Filter '{f}' is not within the vam Saves folder");
-                return f.Substring(vam.Length + 1);
-            }).ToArray());
+            return Filter.From(
+                include?.Select(f => SanitizeFilterPath(vam, f)).ToArray(),
+                exclude?.Select(f => SanitizeFilterPath(vam, f)).ToArray()
+            );
         }
 
-        public async Task ExecuteAsync(string vam, string[]? filters, bool verbose, bool warnings, bool noop)
+        public async Task ExecuteAsync(string vam, string[]? include, string[]? exclude, bool verbose, bool warnings, bool noop)
         {
             vam = SanitizeVamRootFolder(vam);
-            var filter = BuildFilter(vam, filters);
+            var filter = BuildFilter(vam, include, exclude);
 
             var sw = Stopwatch.StartNew();
 
@@ -59,6 +55,15 @@ namespace Varbsorb
             if (string.IsNullOrWhiteSpace(vam)) throw new VarbsorberException("The vam parameter is required (please specify the Virt-A-Mate installation folder)");
             if (vam.EndsWith('/') || vam.EndsWith('\\')) vam = vam[0..^1];
             return vam;
+        }
+
+        private static string SanitizeFilterPath(string vam, string f)
+        {
+            if (!Path.IsPathFullyQualified(f)) f = Path.Combine(vam, f);
+            f = Path.GetFullPath(f);
+            if (!f.StartsWith(vam)) throw new VarbsorberException($"Filter '{f}' is not within the vam folder");
+            if (!f.StartsWith(Path.Combine(vam, "Saves"))) throw new VarbsorberException($"Filter '{f}' is not within the vam Saves folder");
+            return f.Substring(vam.Length + 1);
         }
 
         private void PrintFilesToDelete(bool verbose, ISet<FreeFile> filesToDelete)

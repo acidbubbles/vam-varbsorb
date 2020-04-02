@@ -6,12 +6,14 @@ namespace Varbsorb
     {
         public static readonly IFilter None = new NoFilter();
 
-        public static IFilter From(string[]? filters)
+        public static IFilter From(string[]? include, string[]? exclude)
         {
-            if (filters == null) return None;
-            var sanitized = filters.Where(f => !string.IsNullOrWhiteSpace(f)).ToArray();
-            if (sanitized.Length == 0) return None;
-            return new StringsFilter(sanitized);
+            if (include == null && exclude == null) return None;
+            include = (include ?? new string[0]).Where(f => !string.IsNullOrWhiteSpace(f)).ToArray();
+            exclude = (exclude ?? new string[0]).Where(f => !string.IsNullOrWhiteSpace(f)).ToArray();
+            if (include.Length == 0 && exclude.Length == 0) return None;
+            if (include.Length == 0) return new ExcludeFilter(exclude);
+            return new IncludeFilter(include, exclude);
         }
     }
 
@@ -23,18 +25,36 @@ namespace Varbsorb
         }
     }
 
-    public class StringsFilter : IFilter
+    public class ExcludeFilter : IFilter
     {
-        private readonly string[] _filters;
+        private readonly string[] _exclude;
 
-        public StringsFilter(string[] filters)
+        public ExcludeFilter(string[] exclude)
         {
-            _filters = filters;
+            _exclude = exclude;
         }
 
         public bool IsFiltered(string path)
         {
-            return _filters.Any(f => path.StartsWith(f));
+            return _exclude.Any(f => path.StartsWith(f));
+        }
+    }
+
+    public class IncludeFilter : IFilter
+    {
+        private readonly string[] _include;
+        private readonly string[] _exclude;
+
+        public IncludeFilter(string[] include, string[] exclude)
+        {
+            _include = include;
+            _exclude = exclude;
+        }
+
+        public bool IsFiltered(string path)
+        {
+            if (!_include.Any(f => path.StartsWith(f))) return false;
+            return _exclude.Any(f => path.StartsWith(f));
         }
     }
 
