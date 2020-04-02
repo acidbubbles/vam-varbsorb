@@ -23,6 +23,12 @@ Arguments:
 - `--warnings`: Print missing references found while scanning (usually broken scenes)
 - `--noop`: Does not actually delete or update anything
 
+## Gotchas
+
+This will delete files on your system. Varbsorb tries very hard to ensure it's as safe as possible, but if you have symbolic links in your Saves or Custom folder, Varbsorb will follow them. You might want to make a backup of your Virt-A-Mate Saves and Custom folders, just in case (or add them to Git).
+
+Folders starting with a `.` such as `.git` will not be scanned nor cleaned.
+
 ## Contributing
 
 Pull requests welcome!

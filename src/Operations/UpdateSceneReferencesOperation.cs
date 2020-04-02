@@ -20,13 +20,12 @@ namespace Varbsorb.Operations
             _fs = fs;
         }
 
-        public async Task<IList<FreeFile>> ExecuteAsync(IList<SceneFile> scenes, IList<FreeFilePackageMatch> matches)
+        public async Task ExecuteAsync(IList<SceneFile> scenes, IList<FreeFilePackageMatch> matches, bool noop)
         {
-            var freed = new HashSet<FreeFile>();
+            var scenesProcessed = 0;
             var matchesIndex = matches.SelectMany(m => m.FreeFiles.SelectMany(ff => ff.SelfAndChildren()).Select(ff => (m, ff))).ToDictionary(x => x.ff, x => (file: x.ff, match: x.m));
             using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
-                var scenesProcessed = 0;
                 foreach (var scene in scenes)
                 {
                     var sceneJsonTask = new Lazy<Task<StringBuilder>>(async () => new StringBuilder(await _fs.File.ReadAllTextAsync(scene.File.Path)));
@@ -37,27 +36,26 @@ namespace Varbsorb.Operations
                             var sb = await sceneJsonTask.Value;
                             sb.Remove(sceneRef.Index, sceneRef.Length);
                             sb.Insert(sceneRef.Index, $"{match.match.Package.Name.Author}.{match.match.Package.Name.Name}.{match.match.Package.Name.Version}:/{match.match.PackageFile.LocalPath.Replace('\\', '/')}");
-                            freed.Add(match.file);
                         }
                     }
                     if (sceneJsonTask.IsValueCreated)
                     {
                         var sb = await sceneJsonTask.Value;
-                        await _fs.File.WriteAllTextAsync(scene.File.Path, sb.ToString());
+                        if (!noop)
+                            await _fs.File.WriteAllTextAsync(scene.File.Path, sb.ToString());
                     }
 
                     reporter.Report(new ProgressInfo(++scenesProcessed, scenes.Count, scene.File.LocalPath));
                 }
             }
 
-            Output.WriteLine($"Updated {matches.Count} scenes.");
-
-            return freed.ToList();
+            if (noop) Output.WriteLine($"Skipped updating {scenesProcessed} scenes since --noop was specified.");
+            else Output.WriteLine($"Updated {scenesProcessed} scenes.");
         }
     }
 
     public interface IUpdateSceneReferencesOperation : IOperation
     {
-        Task<IList<FreeFile>> ExecuteAsync(IList<SceneFile> scenes, IList<FreeFilePackageMatch> matches);
+        Task ExecuteAsync(IList<SceneFile> scenes, IList<FreeFilePackageMatch> matches, bool noop);
     }
 }

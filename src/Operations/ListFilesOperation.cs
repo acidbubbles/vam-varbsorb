@@ -24,21 +24,23 @@ namespace Varbsorb.Operations
             using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
                 var counter = 0;
-                files.AddRange(_fs.Directory
-                    .EnumerateFiles(_fs.Path.Combine(vam, "Custom"), "*.*", SearchOption.AllDirectories)
-                    .Select(f => new FreeFile(f, f.RelativeTo(vam)))
-                    .Tap(f => reporter.Report(new ProgressInfo(++counter, 0, f.LocalPath))));
-                files.AddRange(_fs.Directory
-                    .EnumerateFiles(_fs.Path.Combine(vam, "Saves"), "*.*", SearchOption.AllDirectories)
-                    .Select(f => new FreeFile(f, f.RelativeTo(vam)))
-                    .Tap(f => reporter.Report(new ProgressInfo(++counter, 0, f.LocalPath))));
-
+                files.AddRange(ScanFolder(vam, "Custom").Tap(f => reporter.Report(new ProgressInfo(++counter, 0, f.LocalPath))));
+                files.AddRange(ScanFolder(vam, "Saves").Tap(f => reporter.Report(new ProgressInfo(++counter, 0, f.LocalPath))));
                 await GroupCslistRefs(vam, files);
             }
 
             Output.WriteLine($"Scanned {files.Count} files.");
 
             return files;
+        }
+
+        private IEnumerable<FreeFile> ScanFolder(string vam, string folder)
+        {
+            return _fs.Directory
+                .EnumerateFiles(_fs.Path.Combine(vam, folder), "*.*", SearchOption.AllDirectories)
+                // Folders starting with a dot will not be cleaned, it would be better to avoid browsing but hey.
+                .Where(f => !f.Contains(@"\."))
+                .Select(f => new FreeFile(f, f.RelativeTo(vam)));
         }
 
         private async Task GroupCslistRefs(string vam, List<FreeFile> files)

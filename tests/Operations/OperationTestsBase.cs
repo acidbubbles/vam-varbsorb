@@ -23,7 +23,19 @@ namespace Varbsorb.Operations
 
         protected IList<FreeFile> GivenFiles(params string[] localPaths)
         {
-            return localPaths.Select(f => new FreeFile($@"{_vamPath}\{f}", f)).ToList();
+            return localPaths.Select(GivenFile).ToList();
+        }
+
+        protected static FreeFile GivenFile(string f)
+        {
+            return new FreeFile($@"{_vamPath}\{f}", f);
+        }
+
+        protected FreeFile MockFile(string f, string contents)
+        {
+            var file = GivenFile(f);
+            _fs.AddFile(file.Path, new MockFileData(contents));
+            return file;
         }
     }
 }

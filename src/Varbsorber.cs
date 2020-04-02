@@ -11,7 +11,6 @@ namespace Varbsorb
     public class Varbsorber
     {
         public const int MaxWarnings = 20;
-        public const int MaxVerbose = 100;
 
         private readonly IConsoleOutput _output;
         private readonly IOperationsFactory _operationsFactory;
@@ -38,18 +37,12 @@ namespace Varbsorb
 
             var varFiles = await _operationsFactory.Get<IListVarPackagesOperation>().ExecuteAsync(vam);
             var freeFiles = await _operationsFactory.Get<IListFilesOperation>().ExecuteAsync(vam);
-            var scenes = await _operationsFactory.Get<IListScenesOperation>().ExecuteAsync(vam, freeFiles, filter);
+            var scenes = await _operationsFactory.Get<IListScenesOperation>().ExecuteAsync(vam, freeFiles, filter, warnings);
             var matches = await _operationsFactory.Get<IMatchFilesToPackagesOperation>().ExecuteAsync(varFiles, freeFiles);
-            var filesToDelete = await _operationsFactory.Get<IListUnusedFilesOperation>().ExecuteAsync(matches, filter);
-            if (!noop)
-            {
-                await _operationsFactory.Get<IUpdateSceneReferencesOperation>().ExecuteAsync(scenes, matches);
-            }
+            await _operationsFactory.Get<IUpdateSceneReferencesOperation>().ExecuteAsync(scenes, matches, noop);
+            await _operationsFactory.Get<IDeleteMatchedFilesOperation>().ExecuteAsync(matches, filter, verbose, noop);
 
-            PrintFilesToDelete(verbose, filesToDelete);
-            PrintSceneWarnings(warnings, scenes);
-
-            _output.WriteLine($"Cleanup complete. Found {matches.Count} matches out of {freeFiles.Count} files and {varFiles.Count} packages in {sw.Elapsed.Seconds:0.00} seconds. {filesToDelete.Count} files can be deleted. Estimated space saved: {filesToDelete.Sum(f => f.Size) / 1024f / 1024f:0.00}MB.");
+            _output.WriteLine($"Cleanup complete in {sw.Elapsed.Seconds:0.00} seconds.");
         }
 
         private static string SanitizeVamRootFolder(string vam)
@@ -66,39 +59,6 @@ namespace Varbsorb
             if (!f.StartsWith(vam)) throw new VarbsorberException($"Filter '{f}' is not within the vam folder");
             if (!f.StartsWith(Path.Combine(vam, "Saves"))) throw new VarbsorberException($"Filter '{f}' is not within the vam Saves folder");
             return f.Substring(vam.Length + 1);
-        }
-
-        private void PrintFilesToDelete(bool verbose, ISet<FreeFile> filesToDelete)
-        {
-            if (filesToDelete.Count > 0)
-            {
-                _output.WriteLine($"{filesToDelete.Count} files will be deleted.");
-                if (verbose)
-                {
-                    foreach (var file in filesToDelete.Take(MaxVerbose))
-                        _output.WriteLine($"- {file.LocalPath}");
-                }
-            }
-            else
-            {
-                _output.WriteLine("Good news, there's nothing to delete!");
-            }
-        }
-
-        private void PrintSceneWarnings(bool warnings, IList<SceneFile> scenes)
-        {
-            var errors = scenes.Where(s => s.Missing.Any()).ToList();
-            if (errors.Count > 0 && warnings)
-            {
-                foreach (var scene in errors.Take(MaxWarnings))
-                {
-                    _output.WriteLine($"{scene.Missing.Count} Errors in scene: {scene.File.LocalPath}");
-                    foreach (var brokenRef in scene.Missing.Distinct())
-                    {
-                        _output.WriteLine($"- {brokenRef}");
-                    }
-                }
-            }
         }
     }
 }

@@ -16,7 +16,10 @@ namespace Varbsorb.Operations
             "\"(assetUrl|audioClip|url|uid|sceneFilePath|plugin#[0-9+]|act1Target[0-9]+ValueName)\" ?: ?\"(?<path>[^\"]+\\.[a-zA-Z]{2,6})\"",
             RegexOptions.Compiled | RegexOptions.ExplicitCapture,
             TimeSpan.FromSeconds(10));
+
         private readonly IFileSystem _fs;
+
+        private int _warningsLeft = 100;
 
         public ListScenesOperation(IConsoleOutput output, IFileSystem fs)
             : base(output)
@@ -24,7 +27,7 @@ namespace Varbsorb.Operations
             _fs = fs;
         }
 
-        public async Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter)
+        public async Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter, bool warnings)
         {
             var scenes = new List<SceneFile>();
             var filesIndex = files.ToDictionary(f => f.Path, f => f);
@@ -41,7 +44,7 @@ namespace Varbsorb.Operations
                     var potentialSceneReferences = _findFilesFastRegex.Matches(potentialSceneJson).Where(m => m.Success).Select(m => m.Groups["path"]);
                     var sceneFolder = _fs.Path.GetDirectoryName(potentialScene.Path);
                     var references = new List<SceneReference>();
-                    var missing = new List<string>();
+                    var missing = new HashSet<string>();
                     foreach (var reference in potentialSceneReferences)
                     {
                         if (!reference.Success) continue;
@@ -62,8 +65,24 @@ namespace Varbsorb.Operations
                             missing.Add(refPath);
                         }
                     }
+                    var item = new SceneFile(potentialScene, references, missing.ToList());
                     if (references.Count > 0)
-                        scenes.Add(new SceneFile(potentialScene, references, missing));
+                        scenes.Add(item);
+                    if (warnings && missing.Count > 0)
+                    {
+                        if (_warningsLeft > 0)
+                        {
+                            Output.WriteLine($"{missing.Count} missing references in scene {potentialScene.LocalPath}");
+                            foreach (var brokenRef in missing.Distinct())
+                            {
+                                Output.WriteLine($"- {brokenRef}");
+                            }
+                            if (--_warningsLeft == 0)
+                            {
+                                Output.WriteLine("Too many scene errors. Further missing references will not be printed.");
+                            }
+                        }
+                    }
                     reporter.Report(new ProgressInfo(++scenesScanned, potentialScenes.Count, potentialScene.LocalPath));
                 }
             }
@@ -85,6 +104,6 @@ namespace Varbsorb.Operations
 
     public interface IListScenesOperation : IOperation
     {
-        Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter);
+        Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter, bool warnings);
     }
 }

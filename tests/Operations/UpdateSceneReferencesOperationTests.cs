@@ -31,7 +31,7 @@ namespace Varbsorb.Operations
                 )
             };
 
-            var files = await op.ExecuteAsync(scenes, matches);
+            await op.ExecuteAsync(scenes, matches, false);
 
             Assert.That(_fs.GetFile($@"{_vamPath}\Saves\scene\MyScene.json").TextContents, Is.EqualTo(@"{""id"":""Author.Name.1:/Custom/Scripts/MyScript.cs"", ""path"":""Author.Name.1:/Custom/Scripts/MyScript.cs""}"));
         }
