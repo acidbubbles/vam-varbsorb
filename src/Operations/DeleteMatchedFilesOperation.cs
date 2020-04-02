@@ -8,8 +8,6 @@ namespace Varbsorb.Operations
 {
     public class DeleteMatchedFilesOperation : OperationBase, IDeleteMatchedFilesOperation
     {
-        public const int MaxVerbose = 100;
-
         protected override string Name => "Delete matched files";
 
         private readonly IFileSystem _fs;
@@ -36,11 +34,22 @@ namespace Varbsorb.Operations
             {
                 var mbSaved = files.Sum(f => f.Size) / 1024f / 1024f;
                 Output.WriteLine($"{files.Count} files will be deleted. Estimated {mbSaved:0.00}MB saved.");
-                if (noop) Output.WriteLine("* Overriden by --noop, no files will actually be deleted.");
-                foreach (var file in files.Take(MaxVerbose))
+                foreach (var file in files)
                 {
-                    if (verbose) Output.WriteLine($"- {file.LocalPath}");
+                    if (verbose) Output.WriteLine($"{(noop ? "[NOOP]" : "DELETE")}: {file.LocalPath}");
                     if (!noop) _fs.File.Delete(file.Path);
+                }
+
+                if (!noop)
+                {
+                    foreach (var folder in files.Select(f => _fs.Path.GetDirectoryName(f.Path)).Distinct().OrderByDescending(f => f.Length))
+                    {
+                        if (_fs.Directory.Exists(folder) && _fs.Directory.GetFileSystemEntries(folder).Length == 0)
+                        {
+                            if (verbose) Output.WriteLine($"DELETE (empty folder): {folder}");
+                            _fs.Directory.Delete(folder);
+                        }
+                    }
                 }
             }
             else
