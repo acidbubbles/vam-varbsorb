@@ -32,7 +32,7 @@ namespace Varbsorb.Operations
 
             if (files.Count > 0)
             {
-                var mbSaved = files.Sum(f => f.Size) / 1024f / 1024f;
+                var mbSaved = files.Sum(f => (long)(f.Size ?? 0)) / 1024f / 1024f;
                 Output.WriteLine($"{files.Count} files will be deleted. Estimated {mbSaved:0.00}MB saved.");
                 foreach (var file in files)
                 {
