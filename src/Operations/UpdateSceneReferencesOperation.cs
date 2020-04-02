@@ -23,7 +23,7 @@ namespace Varbsorb.Operations
         public async Task ExecuteAsync(IList<SceneFile> scenes, IList<FreeFilePackageMatch> matches, bool noop)
         {
             var scenesProcessed = 0;
-            var matchesIndex = matches.SelectMany(m => m.FreeFiles.SelectMany(ff => ff.SelfAndChildren()).Select(ff => (m, ff))).ToDictionary(x => x.ff, x => (file: x.ff, match: x.m));
+            var matchesIndex = matches.SelectMany(m => m.FreeFiles.SelectMany(ff => ff.SelfAndChildren()).Select(ff => (m, ff))).GroupBy(x => x.ff).ToDictionary(x => x.Key, x => x.Select(z => z.m).ToList());
             using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
                 foreach (var scene in scenes)
@@ -31,11 +31,12 @@ namespace Varbsorb.Operations
                     var sceneJsonTask = new Lazy<Task<StringBuilder>>(async () => new StringBuilder(await _fs.File.ReadAllTextAsync(scene.File.Path)));
                     foreach (var sceneRef in scene.References.OrderByDescending(r => r.Index))
                     {
-                        if (matchesIndex.TryGetValue(sceneRef.File, out var match))
+                        if (matchesIndex.TryGetValue(sceneRef.File, out var fileMatches))
                         {
+                            var match = FindBestMatch(fileMatches);
                             var sb = await sceneJsonTask.Value;
                             sb.Remove(sceneRef.Index, sceneRef.Length);
-                            sb.Insert(sceneRef.Index, $"{match.match.Package.Name.Author}.{match.match.Package.Name.Name}.{match.match.Package.Name.Version}:/{match.match.PackageFile.LocalPath.Replace('\\', '/')}");
+                            sb.Insert(sceneRef.Index, $"{match.Package.Name.Author}.{match.Package.Name.Name}.{match.Package.Name.Version}:/{match.PackageFile.LocalPath.Replace('\\', '/')}");
                         }
                     }
                     if (sceneJsonTask.IsValueCreated)
@@ -51,6 +52,16 @@ namespace Varbsorb.Operations
 
             if (noop) Output.WriteLine($"Skipped updating {scenesProcessed} scenes since --noop was specified.");
             else Output.WriteLine($"Updated {scenesProcessed} scenes.");
+        }
+
+        private FreeFilePackageMatch FindBestMatch(List<FreeFilePackageMatch> matches)
+        {
+            // Find the most recent and small package
+            return matches
+                .GroupBy(m => $"{m.Package.Name.Author}.{m.Package.Name.Name}")
+                .Select(g => g.OrderByDescending(m => m.Package.Name.Version).First())
+                .OrderBy(m => m.Package.Files.Count)
+                .First();
         }
     }
 

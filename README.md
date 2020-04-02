@@ -29,6 +29,8 @@ This will delete files on your system. Varbsorb tries very hard to ensure it's a
 
 Folders starting with a `.` such as `.git` will not be scanned nor cleaned.
 
+When multiple var matches are found, the most recent and with the least files will be selected. The reasoning is if someone creates a var file with textures, but there's a package _for_ these textures, the latter is a better choice.
+
 ## Contributing
 
 Pull requests welcome!

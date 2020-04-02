@@ -29,11 +29,11 @@ namespace Varbsorb.Operations
 
         public async Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter, bool warnings)
         {
+            var scenesScanned = 0;
             var scenes = new List<SceneFile>();
             var filesIndex = files.ToDictionary(f => f.Path, f => f);
             using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
-                var scenesScanned = 0;
                 var potentialScenes = files
                     .Where(f => f.Extension == ".json")
                     .Where(f => !filter.IsFiltered(f.LocalPath))
@@ -87,7 +87,7 @@ namespace Varbsorb.Operations
                 }
             }
 
-            Output.WriteLine($"Scanned {files.Count} scenes.");
+            Output.WriteLine($"Scanned {scenesScanned} scenes.");
 
             return scenes;
         }
