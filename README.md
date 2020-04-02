@@ -25,7 +25,15 @@ Arguments:
 
 ## Contributing
 
-Pull requests welcome! Find more information on the architecture, how to compile and how to contribute in the [contributing guide](CONTRIBUTING.md)
+Pull requests welcome!
+
+You'll need the [.NET Core 3.1 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.1). You can run with:
+
+```bash
+> dotnet run --project .\src\ -- --vam :\Vam
+```
+
+Launch settings are configured for [vscode](https://code.visualstudio.com/).
 
 ## License
 
