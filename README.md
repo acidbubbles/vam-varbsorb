@@ -14,6 +14,15 @@ In a command line:
 > varbsorb --vam C:\Vam
 ```
 
+Arguments:
+
+- `--vam`: The root path of Virt-A-Mate
+- `--include`: Limit affected files to this path prefix, relative to vam (affects files that would be deleted or updated)
+- `--exclude`: Paths to skip, relative to vam (affects files that would be deleted or updated)
+- `--verbose`: Print more information
+- `--warnings`: Print missing references found while scanning (usually broken scenes)
+- `--noop`: Does not actually delete or update anything
+
 ## Contributing
 
 Pull requests welcome! Find more information on the architecture, how to compile and how to contribute in the [contributing guide](CONTRIBUTING.md)
