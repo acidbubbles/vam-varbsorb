@@ -49,6 +49,7 @@ namespace Varbsorb
             builder.RegisterType<FileSystem>().As<IFileSystem>();
             builder.RegisterType<ListVarPackagesOperation>().As<IListVarPackagesOperation>();
             builder.RegisterType<SHA1HashingAlgo>().As<IHashingAlgo>();
+            builder.RegisterType<RecycleBin>().As<IRecycleBin>();
             builder.RegisterType<ListFilesOperation>().As<IListFilesOperation>();
             builder.RegisterType<MatchFilesToPackagesOperation>().As<IMatchFilesToPackagesOperation>();
             builder.RegisterType<ListScenesOperation>().As<IListScenesOperation>();
