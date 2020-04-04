@@ -23,7 +23,7 @@ jobs:
       run: echo "::set-output name=VERSION::$($env:GITHUB_REF.Substring(11))"
       shell: powershell
     - name: Publish x64
-      run: dotnet publish src/Varbsorb.csproj -c Release --no-restore -r win10-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true /p:UseAppHost=true /p:Version=${{ steps.get_version.outputs.VERSION }}
+      run: dotnet publish src/Varbsorb.csproj -c Release --no-restore -r win10-x64 /p:PublishSingleFile=true /p:UseAppHost=true /p:Version=${{ steps.get_version.outputs.VERSION }}
     - name: GitHub release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')

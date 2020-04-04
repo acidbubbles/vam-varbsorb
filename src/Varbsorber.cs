@@ -51,13 +51,13 @@ namespace Varbsorb
         {
             if (string.IsNullOrWhiteSpace(vam))
             {
-                vam = _fs.Path.GetDirectoryName(AppContext.BaseDirectory);
-                if (_fs.File.Exists(_fs.Path.Combine("VaM.exe")))
+                if (_fs.File.Exists(_fs.Path.Combine(Environment.CurrentDirectory, "VaM.exe")))
                 {
-                    return vam;
+                    return Environment.CurrentDirectory;
                 }
                 throw new VarbsorberException("The vam parameter is required, or you can place varbsorb.exe in the same folder as VaM.exe.");
             }
+
             if (vam.EndsWith('/') || vam.EndsWith('\\')) vam = vam[0..^1];
             return vam;
         }
