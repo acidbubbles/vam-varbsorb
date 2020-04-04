@@ -19,7 +19,7 @@ namespace Varbsorb.Operations
         private readonly IFileSystem _fs;
         private readonly IHashingAlgo _hashingAlgo;
 
-        private ConcurrentBag<VarPackage> _packages = new ConcurrentBag<VarPackage>();
+        private readonly ConcurrentBag<VarPackage> _packages = new ConcurrentBag<VarPackage>();
         private int _scanned = 0;
 
         public ListVarPackagesOperation(IConsoleOutput output, IFileSystem fs, IHashingAlgo hashingAlgo)
