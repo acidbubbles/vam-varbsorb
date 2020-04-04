@@ -52,6 +52,7 @@ namespace Varbsorb
             builder.RegisterType<ListScenesOperation>().As<IListScenesOperation>();
             builder.RegisterType<DeleteMatchedFilesOperation>().As<IDeleteMatchedFilesOperation>();
             builder.RegisterType<UpdateSceneReferencesOperation>().As<IUpdateSceneReferencesOperation>();
+            builder.RegisterType<DeleteOrphanMorphFilesOperation>().As<IDeleteOrphanMorphFilesOperation>();
             builder.RegisterType<OperationsFactory>().As<IOperationsFactory>();
             builder.RegisterType<Varbsorber>();
             return builder.Build();

@@ -6,38 +6,36 @@ using Varbsorb.Models;
 
 namespace Varbsorb.Operations
 {
-    public class DeleteMatchedFilesOperation : OperationBase, IDeleteMatchedFilesOperation
+    public class DeleteOrphanMorphFilesOperation : OperationBase, IDeleteOrphanMorphFilesOperation
     {
         protected override string Name => "Delete matched files";
 
         private readonly IFileSystem _fs;
 
-        public DeleteMatchedFilesOperation(IConsoleOutput output, IFileSystem fs)
+        public DeleteOrphanMorphFilesOperation(IConsoleOutput output, IFileSystem fs)
             : base(output)
         {
             _fs = fs;
         }
 
-        public Task ExecuteAsync(IList<FreeFile> files, IList<FreeFilePackageMatch> matches, IFilter filter, bool verbose, bool noop)
+        public Task ExecuteAsync(IList<FreeFile> files, IFilter filter, bool verbose, bool noop)
         {
-            var filesToDelete = new HashSet<FreeFile>();
-
-            foreach (var match in matches)
-            {
-                foreach (var file in match.FreeFiles.Where(f => !filter.IsFiltered(f.LocalPath)).SelectMany(f => f.SelfAndChildren()))
-                {
-                    filesToDelete.Add(file);
-                }
-            }
+            var filesToDelete = files
+                .Where(f => !filter.IsFiltered(f.LocalPath)).SelectMany(f => f.SelfAndChildren())
+                .Where(f => f.Extension == ".vmi" || f.Extension == ".vmb")
+                .Select(f => (basePath: f.LocalPath.Substring(0, f.LocalPath.Length - f.Extension.Length), file: f))
+                .GroupBy(x => x.basePath)
+                .Where(g => g.Count() == 1)
+                .Select(g => g.Single().file)
+                .Where(f => f.Extension == ".vmi")
+                .ToList();
 
             if (filesToDelete.Count == 0)
             {
-                Output.WriteLine("Good news, there's nothing to delete!");
+                Output.WriteLine("No orphan morph files");
                 return Task.CompletedTask;
             }
 
-            var mbSaved = filesToDelete.Sum(f => (long)(f.Size ?? 0)) / 1024f / 1024f;
-            Output.WriteLine($"{filesToDelete.Count} files will be deleted. Estimated {mbSaved:0.00}MB saved.");
             using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
                 var processed = 0;
@@ -62,14 +60,14 @@ namespace Varbsorb.Operations
                 }
             }
 
-            Output.WriteLine($"Deleted {filesToDelete.Count} matched files.");
+            Output.WriteLine($"Deleted {filesToDelete.Count} orphan morph files.");
 
             return Task.CompletedTask;
         }
     }
 
-    public interface IDeleteMatchedFilesOperation : IOperation
+    public interface IDeleteOrphanMorphFilesOperation : IOperation
     {
-        Task ExecuteAsync(IList<FreeFile> files, IList<FreeFilePackageMatch> matches, IFilter filter, bool verbose, bool noop);
+        Task ExecuteAsync(IList<FreeFile> files, IFilter filter, bool verbose, bool noop);
     }
 }

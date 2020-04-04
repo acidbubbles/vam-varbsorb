@@ -16,6 +16,7 @@ namespace Varbsorb.Operations
             var scriptListChild = MockFile(@"Custom\Scripts\Complex\Child.cs", "...");
             var scriptListFile = MockFile(@"Custom\Scripts\Complex\Complex.cslist", "...");
             scriptListFile.Children = new List<FreeFile> { scriptListChild };
+            var files = new List<FreeFile> { scriptFile, filteredFile, scriptListFile };
             var matches = new List<FreeFilePackageMatch>
             {
                 new FreeFilePackageMatch(
@@ -26,12 +27,13 @@ namespace Varbsorb.Operations
             };
             var op = new DeleteMatchedFilesOperation(_consoleOutput.Object, _fs);
 
-            await op.ExecuteAsync(matches, new ExcludeFilter(new[] { @"Saves\Filtered" }), false, false);
+            await op.ExecuteAsync(files, matches, new ExcludeFilter(new[] { @"Saves\Filtered" }), false, false);
 
             Assert.That(!_fs.FileExists(scriptFile.Path));
             Assert.That(!_fs.FileExists(scriptListFile.Path));
             Assert.That(!_fs.FileExists(scriptListChild.Path));
             Assert.That(_fs.FileExists(filteredFile.Path));
+            Assert.That(files, Is.EquivalentTo(new[] { filteredFile }));
         }
     }
 }

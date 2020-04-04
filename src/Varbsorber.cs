@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Varbsorb.Models;
 using Varbsorb.Operations;
 
 namespace Varbsorb
@@ -40,7 +38,8 @@ namespace Varbsorb
             var scenes = await _operationsFactory.Get<IListScenesOperation>().ExecuteAsync(vam, freeFiles, filter, warnings);
             var matches = await _operationsFactory.Get<IMatchFilesToPackagesOperation>().ExecuteAsync(varFiles, freeFiles);
             await _operationsFactory.Get<IUpdateSceneReferencesOperation>().ExecuteAsync(scenes, matches, noop);
-            await _operationsFactory.Get<IDeleteMatchedFilesOperation>().ExecuteAsync(matches, filter, verbose, noop);
+            await _operationsFactory.Get<IDeleteMatchedFilesOperation>().ExecuteAsync(freeFiles, matches, filter, verbose, noop);
+            await _operationsFactory.Get<IDeleteOrphanMorphFilesOperation>().ExecuteAsync(freeFiles, filter, verbose, noop);
 
             _output.WriteLine($"Cleanup complete in {sw.Elapsed.Seconds:0.00} seconds.");
         }
