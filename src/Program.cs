@@ -15,6 +15,7 @@ namespace Varbsorb
         /// <param name="vam">The Virt-A-Mate install folder.</param>
         /// <param name="include">Filter which files will be included. You can specify partial paths starting from the vam root.</param>
         /// <param name="exclude">Filter which files will be excluded. You can specify partial paths starting from the vam root.</param>
+        /// <param name="permanent">Whether to permanently delete files. By default, deleted files will be sent to the recycle bin.</param>
         /// <param name="verbose">Prints detailed output.</param>
         /// <param name="warnings">Prints broken scene references.</param>
         /// <param name="noop">Do not actually delete or write anything, just print the result.</param>
@@ -22,6 +23,7 @@ namespace Varbsorb
             string vam,
             string[]? include = null,
             string[]? exclude = null,
+            bool permanent = false,
             bool verbose = false,
             bool warnings = false,
             bool noop = false)
@@ -30,7 +32,7 @@ namespace Varbsorb
             var runtime = container.Resolve<Varbsorber>();
             try
             {
-                await runtime.ExecuteAsync(vam, include, exclude, verbose, warnings, noop);
+                await runtime.ExecuteAsync(vam, include, exclude, permanent, verbose, warnings, noop);
                 return 0;
             }
             catch (VarbsorberException exc)

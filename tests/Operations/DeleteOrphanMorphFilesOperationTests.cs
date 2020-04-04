@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Moq;
 using NUnit.Framework;
 using Varbsorb.Models;
 
@@ -18,9 +19,9 @@ namespace Varbsorb.Operations
                 MockFile(@"Saves\scene\Custom\Person\male\morph1.vmi", ""),
                 MockFile(@"Saves\Filtered\morph1.vmi", "")
             };
-            var op = new DeleteOrphanMorphFilesOperation(_consoleOutput.Object, _fs);
+            var op = new DeleteOrphanMorphFilesOperation(_consoleOutput.Object, _fs, Mock.Of<IRecycleBin>());
 
-            await op.ExecuteAsync(files, new ExcludeFilter(new[] { @"Saves\Filtered" }), false, false);
+            await op.ExecuteAsync(files, true, new ExcludeFilter(new[] { @"Saves\Filtered" }), false, false);
 
             Assert.That(_fs.Directory.GetFiles(_vamPath, "*.*", SearchOption.AllDirectories), Is.EquivalentTo(new[]
             {

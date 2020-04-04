@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using Moq;
 using NUnit.Framework;
 using Varbsorb.Models;
 
@@ -25,9 +25,9 @@ namespace Varbsorb.Operations
                      new[] { scriptFile, scriptListFile }
                 )
             };
-            var op = new DeleteMatchedFilesOperation(_consoleOutput.Object, _fs);
+            var op = new DeleteMatchedFilesOperation(_consoleOutput.Object, _fs, Mock.Of<IRecycleBin>());
 
-            await op.ExecuteAsync(files, matches, new ExcludeFilter(new[] { @"Saves\Filtered" }), false, false);
+            await op.ExecuteAsync(files, matches, true, new ExcludeFilter(new[] { @"Saves\Filtered" }), false, false);
 
             Assert.That(!_fs.FileExists(scriptFile.Path));
             Assert.That(!_fs.FileExists(scriptListFile.Path));
