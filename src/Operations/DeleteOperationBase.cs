@@ -23,11 +23,11 @@ namespace Varbsorb.Operations
         public Task DeleteAsync(IList<FreeFile> files, ISet<FreeFile> filesToDelete, DeleteOptions delete, VerbosityOptions verbosity, ExecutionOptions execution)
         {
             if (filesToDelete.Count >= files.Sum(f => f.Children == null ? 1 : 1 + f.Children.Count))
-                throw new InvalidOperationException($"Attempt to delete {filesToDelete.Count}, which is more than the total scanned files.");
+                throw new InvalidOperationException($"{Name}: Attempt to delete {filesToDelete.Count}, which is more than the total scanned files.");
 
             if (filesToDelete.Count == 0)
             {
-                Output.WriteLine("Nothing to delete.");
+                Output.WriteLine($"{Name}: Nothing to delete.");
                 return Task.CompletedTask;
             }
 
@@ -56,7 +56,7 @@ namespace Varbsorb.Operations
                 }
             }
 
-            Output.WriteLine($"Deleted {filesToDelete.Count} files. Estimated {mbSaved:0.00}MB saved.");
+            Output.WriteLine($"{Name}: Deleted {filesToDelete.Count} files. Estimated {mbSaved:0.00}MB saved.");
 
             return Task.CompletedTask;
         }
