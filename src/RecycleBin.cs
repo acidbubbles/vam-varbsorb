@@ -20,7 +20,7 @@ namespace Varbsorb
 #pragma warning disable SA1310
 #pragma warning disable SA1313
 
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto, Pack = 1)]
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto/*, Pack = 1*/)]
         public struct SHFILEOPSTRUCT
         {
             public IntPtr hwnd;
@@ -38,9 +38,11 @@ namespace Varbsorb
         [DllImport("shell32.dll", CharSet = CharSet.Auto)]
         public static extern int SHFileOperation(ref SHFILEOPSTRUCT FileOp);
 
-        public const int FO_DELETE = 3;
+        public const int FO_DELETE = 0x0003;
         public const int FOF_ALLOWUNDO = 0x40;
         public const int FOF_NOCONFIRMATION = 0x10; // Don't prompt the user
+        public const int FOF_NOERRORUI = 0x0400;
+        public const int FOF_SILENT = 0x0004;
 
 #pragma warning restore SA1307
 #pragma warning restore SA1310
