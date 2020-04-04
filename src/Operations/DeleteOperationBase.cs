@@ -20,7 +20,7 @@ namespace Varbsorb.Operations
             _recycleBin = recycleBin;
         }
 
-        public Task DeleteAsync(IList<FreeFile> files, ISet<FreeFile> filesToDelete, bool permanent, bool verbose, bool noop)
+        public Task DeleteAsync(IList<FreeFile> files, ISet<FreeFile> filesToDelete, DeleteOptions delete, VerbosityOptions verbosity, ExecutionOptions execution)
         {
             if (filesToDelete.Count >= files.Sum(f => f.Children == null ? 1 : 1 + f.Children.Count))
                 throw new InvalidOperationException($"Attempt to delete {filesToDelete.Count}, which is more than the total scanned files.");
@@ -37,19 +37,19 @@ namespace Varbsorb.Operations
                 var processed = 0;
                 foreach (var file in filesToDelete)
                 {
-                    if (verbose) Output.WriteLine($"{(noop ? "[NOOP]" : "DELETE")}: {file.LocalPath}");
-                    if (!noop) DeleteFile(file.Path, permanent);
+                    if (verbosity == VerbosityOptions.Verbose) Output.WriteLine($"{(execution == ExecutionOptions.Noop ? "[NOOP]" : "DELETE")}: {file.LocalPath}");
+                    if (execution != ExecutionOptions.Noop) DeleteFile(file.Path, delete);
                     files.Remove(file);
                     reporter.Report(new ProgressInfo(++processed, filesToDelete.Count, file.LocalPath));
                 }
 
-                if (!noop)
+                if (execution != ExecutionOptions.Noop)
                 {
                     foreach (var folder in filesToDelete.Select(f => FileSystem.Path.GetDirectoryName(f.Path)).Distinct().OrderByDescending(f => f.Length))
                     {
                         if (FileSystem.Directory.Exists(folder) && FileSystem.Directory.GetFileSystemEntries(folder).Length == 0)
                         {
-                            if (verbose) Output.WriteLine($"DELETE (empty folder): {folder}");
+                            if (verbosity == VerbosityOptions.Verbose) Output.WriteLine($"DELETE (empty folder): {folder}");
                             FileSystem.Directory.Delete(folder);
                         }
                     }
@@ -61,9 +61,9 @@ namespace Varbsorb.Operations
             return Task.CompletedTask;
         }
 
-        protected void DeleteFile(string path, bool permanent)
+        protected void DeleteFile(string path, DeleteOptions delete)
         {
-            if (permanent)
+            if (delete == DeleteOptions.Permanent)
             {
                 FileSystem.File.Delete(path);
             }

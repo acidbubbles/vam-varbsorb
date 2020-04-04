@@ -15,7 +15,7 @@ namespace Varbsorb.Operations
         {
         }
 
-        public async Task ExecuteAsync(IList<FreeFile> files, IList<FreeFilePackageMatch> matches, bool permanent, IFilter filter, bool verbose, bool noop)
+        public async Task ExecuteAsync(IList<FreeFile> files, IList<FreeFilePackageMatch> matches, DeleteOptions delete, IFilter filter, VerbosityOptions verbosity, ExecutionOptions execution)
         {
             var filesToDelete = new HashSet<FreeFile>();
 
@@ -27,12 +27,12 @@ namespace Varbsorb.Operations
                 }
             }
 
-            await DeleteAsync(files, filesToDelete, permanent, verbose, noop);
+            await DeleteAsync(files, filesToDelete, delete, verbosity, execution);
         }
     }
 
     public interface IDeleteMatchedFilesOperation : IOperation
     {
-        Task ExecuteAsync(IList<FreeFile> files, IList<FreeFilePackageMatch> matches, bool permanent, IFilter filter, bool verbose, bool noop);
+        Task ExecuteAsync(IList<FreeFile> files, IList<FreeFilePackageMatch> matches, DeleteOptions delete, IFilter filter, VerbosityOptions verbosity, ExecutionOptions execution);
     }
 }

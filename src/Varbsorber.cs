@@ -22,7 +22,7 @@ namespace Varbsorb
             _operationsFactory = operationsFactory;
         }
 
-        public async Task ExecuteAsync(string vam, string[]? include, string[]? exclude, bool permanent, bool verbose, bool warnings, bool noop)
+        public async Task ExecuteAsync(string vam, string[]? include, string[]? exclude, DeleteOptions delete, VerbosityOptions verbosity, ErrorReportingOptions warnings, ExecutionOptions execution)
         {
             vam = SanitizeVamRootFolder(vam);
             var filter = BuildFilter(vam, include, exclude);
@@ -33,9 +33,9 @@ namespace Varbsorb
             var freeFiles = await _operationsFactory.Get<IListFilesOperation>().ExecuteAsync(vam);
             var scenes = await _operationsFactory.Get<IListScenesOperation>().ExecuteAsync(vam, freeFiles, filter, warnings);
             var matches = await _operationsFactory.Get<IMatchFilesToPackagesOperation>().ExecuteAsync(varFiles, freeFiles);
-            await _operationsFactory.Get<IUpdateSceneReferencesOperation>().ExecuteAsync(scenes, matches, noop);
-            await _operationsFactory.Get<IDeleteMatchedFilesOperation>().ExecuteAsync(freeFiles, matches, permanent, filter, verbose, noop);
-            await _operationsFactory.Get<IDeleteOrphanMorphFilesOperation>().ExecuteAsync(freeFiles, permanent, filter, verbose, noop);
+            await _operationsFactory.Get<IUpdateSceneReferencesOperation>().ExecuteAsync(scenes, matches, execution);
+            await _operationsFactory.Get<IDeleteMatchedFilesOperation>().ExecuteAsync(freeFiles, matches, delete, filter, verbosity, execution);
+            await _operationsFactory.Get<IDeleteOrphanMorphFilesOperation>().ExecuteAsync(freeFiles, delete, filter, verbosity, execution);
 
             _output.WriteLine($"Cleanup complete in {sw.Elapsed.Seconds:0.00} seconds.");
         }

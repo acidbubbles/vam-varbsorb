@@ -27,7 +27,7 @@ namespace Varbsorb.Operations
             _fs = fs;
         }
 
-        public async Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter, bool warnings)
+        public async Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter, ErrorReportingOptions warnings)
         {
             var scenesScanned = 0;
             var scenes = new List<SceneFile>();
@@ -68,7 +68,7 @@ namespace Varbsorb.Operations
                     var item = new SceneFile(potentialScene, references, missing.ToList());
                     if (references.Count > 0)
                         scenes.Add(item);
-                    if (warnings && missing.Count > 0)
+                    if (warnings == ErrorReportingOptions.ShowWarnings && missing.Count > 0)
                     {
                         if (_warningsLeft > 0)
                         {
@@ -104,6 +104,6 @@ namespace Varbsorb.Operations
 
     public interface IListScenesOperation : IOperation
     {
-        Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter, bool warnings);
+        Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter, ErrorReportingOptions warnings);
     }
 }

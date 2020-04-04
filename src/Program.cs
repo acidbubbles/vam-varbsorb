@@ -32,7 +32,14 @@ namespace Varbsorb
             var runtime = container.Resolve<Varbsorber>();
             try
             {
-                await runtime.ExecuteAsync(vam, include, exclude, permanent, verbose, warnings, noop);
+                await runtime.ExecuteAsync(
+                    vam,
+                    include,
+                    exclude,
+                    permanent ? DeleteOptions.Permanent : DeleteOptions.RecycleBin,
+                    verbose ? VerbosityOptions.Verbose : VerbosityOptions.Default,
+                    warnings ? ErrorReportingOptions.ShowWarnings : ErrorReportingOptions.None,
+                    noop ? ExecutionOptions.Noop : ExecutionOptions.Default);
                 return 0;
             }
             catch (VarbsorberException exc)

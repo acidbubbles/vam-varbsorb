@@ -27,7 +27,7 @@ namespace Varbsorb.Operations
                 GivenPackageMatch("Author.Name.1.var", scriptFile)
             };
 
-            await op.ExecuteAsync(scenes, matches, false);
+            await op.ExecuteAsync(scenes, matches, ExecutionOptions.Default);
 
             Assert.That(_fs.GetFile($@"{_vamPath}\Saves\scene\MyScene.json").TextContents, Is.EqualTo(@"{""id"":""Author.Name.1:/Custom/Scripts/MyScript.cs"", ""path"":""Author.Name.1:/Custom/Scripts/MyScript.cs""}"));
         }
@@ -51,7 +51,7 @@ namespace Varbsorb.Operations
                 GivenPackageMatch("Author.Other.3.var", scriptFile, 2),
             };
 
-            await op.ExecuteAsync(scenes, matches, false);
+            await op.ExecuteAsync(scenes, matches, ExecutionOptions.Default);
 
             Assert.That(_fs.GetFile($@"{_vamPath}\Saves\scene\MyScene.json").TextContents, Is.EqualTo(@"{""id"":""Author.Name.2:/Custom/Scripts/MyScript.cs""}"));
         }

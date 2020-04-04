@@ -21,7 +21,7 @@ namespace Varbsorb.Operations
             };
             var op = new DeleteOrphanMorphFilesOperation(_consoleOutput.Object, _fs, Mock.Of<IRecycleBin>());
 
-            await op.ExecuteAsync(files, true, new ExcludeFilter(new[] { @"Saves\Filtered" }), false, false);
+            await op.ExecuteAsync(files, DeleteOptions.Permanent, new ExcludeFilter(new[] { @"Saves\Filtered" }), VerbosityOptions.Default, ExecutionOptions.Default);
 
             Assert.That(_fs.Directory.GetFiles(_vamPath, "*.*", SearchOption.AllDirectories), Is.EquivalentTo(new[]
             {

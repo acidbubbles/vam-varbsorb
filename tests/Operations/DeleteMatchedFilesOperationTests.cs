@@ -27,7 +27,7 @@ namespace Varbsorb.Operations
             };
             var op = new DeleteMatchedFilesOperation(_consoleOutput.Object, _fs, Mock.Of<IRecycleBin>());
 
-            await op.ExecuteAsync(files, matches, true, new ExcludeFilter(new[] { @"Saves\Filtered" }), false, false);
+            await op.ExecuteAsync(files, matches, DeleteOptions.Permanent, new ExcludeFilter(new[] { @"Saves\Filtered" }), VerbosityOptions.Default, ExecutionOptions.Default);
 
             Assert.That(!_fs.FileExists(scriptFile.Path));
             Assert.That(!_fs.FileExists(scriptListFile.Path));

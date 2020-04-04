@@ -15,7 +15,7 @@ namespace Varbsorb.Operations
         {
         }
 
-        public async Task ExecuteAsync(IList<FreeFile> files, bool permanent, IFilter filter, bool verbose, bool noop)
+        public async Task ExecuteAsync(IList<FreeFile> files, DeleteOptions delete, IFilter filter, VerbosityOptions verbosity, ExecutionOptions execution)
         {
             var filesToDelete = new HashSet<FreeFile>(files
                 .Where(f => !filter.IsFiltered(f.LocalPath)).SelectMany(f => f.SelfAndChildren())
@@ -26,12 +26,12 @@ namespace Varbsorb.Operations
                 .Select(g => g.Single().file)
                 .Where(f => f.Extension == ".vmi"));
 
-            await DeleteAsync(files, filesToDelete, permanent, verbose, noop);
+            await DeleteAsync(files, filesToDelete, delete, verbosity, execution);
         }
     }
 
     public interface IDeleteOrphanMorphFilesOperation : IOperation
     {
-        Task ExecuteAsync(IList<FreeFile> files, bool permanent, IFilter filter, bool verbose, bool noop);
+        Task ExecuteAsync(IList<FreeFile> files, DeleteOptions delete, IFilter filter, VerbosityOptions verbosity, ExecutionOptions execution);
     }
 }

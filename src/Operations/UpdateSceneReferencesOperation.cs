@@ -20,7 +20,7 @@ namespace Varbsorb.Operations
             _fs = fs;
         }
 
-        public async Task ExecuteAsync(IList<SceneFile> scenes, IList<FreeFilePackageMatch> matches, bool noop)
+        public async Task ExecuteAsync(IList<SceneFile> scenes, IList<FreeFilePackageMatch> matches, ExecutionOptions execution)
         {
             var scenesProcessed = 0;
             var matchesIndex = matches.SelectMany(m => m.FreeFiles.SelectMany(ff => ff.SelfAndChildren()).Select(ff => (m, ff))).GroupBy(x => x.ff).ToDictionary(x => x.Key, x => x.Select(z => z.m).ToList());
@@ -42,7 +42,7 @@ namespace Varbsorb.Operations
                     if (sceneJsonTask.IsValueCreated)
                     {
                         var sb = await sceneJsonTask.Value;
-                        if (!noop)
+                        if (execution != ExecutionOptions.Noop)
                             await _fs.File.WriteAllTextAsync(scene.File.Path, sb.ToString());
                     }
 
@@ -50,7 +50,7 @@ namespace Varbsorb.Operations
                 }
             }
 
-            if (noop) Output.WriteLine($"Skipped updating {scenesProcessed} scenes since --noop was specified.");
+            if (execution == ExecutionOptions.Noop) Output.WriteLine($"Skipped updating {scenesProcessed} scenes since --noop was specified.");
             else Output.WriteLine($"Updated {scenesProcessed} scenes.");
         }
 
@@ -67,6 +67,6 @@ namespace Varbsorb.Operations
 
     public interface IUpdateSceneReferencesOperation : IOperation
     {
-        Task ExecuteAsync(IList<SceneFile> scenes, IList<FreeFilePackageMatch> matches, bool noop);
+        Task ExecuteAsync(IList<SceneFile> scenes, IList<FreeFilePackageMatch> matches, ExecutionOptions execution);
     }
 }
