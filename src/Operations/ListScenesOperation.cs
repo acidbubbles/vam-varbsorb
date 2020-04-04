@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using Varbsorb.Models;
 
 namespace Varbsorb.Operations
@@ -40,7 +41,21 @@ namespace Varbsorb.Operations
                     .Where(f => f.Extension == ".json")
                     .Where(f => !filter.IsFiltered(f.LocalPath))
                     .ToList();
-                await Task.WhenAll(potentialScenes.Select(s => ScanSceneAsync(vam, s, potentialScenes.Count, warnings, filesIndex, reporter)));
+
+                var scanSceneBlock = new ActionBlock<FreeFile>(
+                    s => ScanSceneAsync(vam, s, potentialScenes.Count, warnings, filesIndex, reporter),
+                    new ExecutionDataflowBlockOptions
+                    {
+                        MaxDegreeOfParallelism = 4
+                    });
+
+                foreach (var potentialScene in potentialScenes)
+                {
+                    scanSceneBlock.Post(potentialScene);
+                }
+
+                scanSceneBlock.Complete();
+                await scanSceneBlock.Completion;
             }
 
             Output.WriteLine($"Scanned {_scanned} scenes.");

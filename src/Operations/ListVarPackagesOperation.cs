@@ -7,6 +7,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using Varbsorb.Hashing;
 using Varbsorb.Models;
 
@@ -34,7 +35,21 @@ namespace Varbsorb.Operations
             using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
                 var packageFiles = _fs.Directory.GetFiles(_fs.Path.Combine(vam, "AddonPackages"), "*.var");
-                await Task.WhenAll(packageFiles.Select(f => ExecuteOneAsync(reporter, packageFiles.Length, f)));
+
+                var scanPackageBlock = new ActionBlock<string>(
+                    f => ExecuteOneAsync(reporter, packageFiles.Length, f),
+                    new ExecutionDataflowBlockOptions
+                    {
+                        MaxDegreeOfParallelism = 4
+                    });
+
+                foreach (var packageFile in packageFiles)
+                {
+                    scanPackageBlock.Post(packageFile);
+                }
+
+                scanPackageBlock.Complete();
+                await scanPackageBlock.Completion;
             }
 
             Output.WriteLine($"Scanned {_packages.Count} packages.");

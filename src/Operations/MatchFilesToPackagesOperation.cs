@@ -5,6 +5,7 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using Varbsorb.Hashing;
 using Varbsorb.Models;
 
@@ -31,7 +32,20 @@ namespace Varbsorb.Operations
             var freeFilesSet = new ConcurrentDictionary<string, List<FreeFile>>(freeFiles.GroupBy(ff => ff.FilenameLower).ToDictionary(f => f.Key, f => f.ToList()));
             using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
-                await Task.WhenAll(packages.Select(package => MatchPackageAsync(reporter, package, packages.Count, freeFilesSet)));
+                var matchPackageBlock = new ActionBlock<VarPackage>(
+                    package => MatchPackageAsync(reporter, package, packages.Count, freeFilesSet),
+                    new ExecutionDataflowBlockOptions
+                    {
+                        MaxDegreeOfParallelism = 4
+                    });
+
+                foreach (var package in packages)
+                {
+                    matchPackageBlock.Post(package);
+                }
+
+                matchPackageBlock.Complete();
+                await matchPackageBlock.Completion;
             }
 
             Output.WriteLine($"Matched {_matches.Count} files.");
