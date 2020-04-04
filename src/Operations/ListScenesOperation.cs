@@ -60,7 +60,12 @@ namespace Varbsorb.Operations
 
             Output.WriteLine($"Scanned {_scanned} scenes.");
 
-            return _scenes.ToList();
+            var scenes = _scenes.OrderBy(s => s.File.LocalPath).ToList();
+
+            if (warnings == ErrorReportingOptions.ShowWarnings)
+                PrintWarnings(scenes);
+
+            return scenes;
         }
 
         private static string MigrateLegacyPaths(string refPath)
@@ -70,6 +75,26 @@ namespace Varbsorb.Operations
             if (refPath.StartsWith(@"Import\morphs\", StringComparison.OrdinalIgnoreCase)) return @"Custom\Atom\Person\Morphs\" + refPath.Substring(@"Import\morphs\".Length);
             if (refPath.StartsWith(@"Textures\", StringComparison.OrdinalIgnoreCase)) return @"Custom\Atom\Person\Textures\" + refPath.Substring(@"Textures\".Length);
             return refPath;
+        }
+
+        private void PrintWarnings(List<SceneFile> scenes)
+        {
+            foreach (var scene in scenes.Where(s => s.Missing.Count > 0))
+            {
+                var missing = scene.Missing;
+                if (_warningsLeft > 0)
+                {
+                    Output.WriteLine($"{missing.Count} missing references in scene {scene.File.LocalPath}");
+                    foreach (var brokenRef in missing.Distinct())
+                    {
+                        Output.WriteLine($"- {brokenRef}");
+                    }
+                    if (--_warningsLeft == 0)
+                    {
+                        Output.WriteLine("Too many scene errors. Further missing references will not be printed.");
+                    }
+                }
+            }
         }
 
         private async Task ScanSceneAsync(string vam, FreeFile potentialScene, int potentialScenesCount, ErrorReportingOptions warnings, ConcurrentDictionary<string, FreeFile> filesIndex, ProgressReporter<ProgressInfo> reporter)
@@ -102,21 +127,6 @@ namespace Varbsorb.Operations
             var item = new SceneFile(potentialScene, references, missing.ToList());
             if (references.Count > 0)
                 _scenes.Add(item);
-            if (warnings == ErrorReportingOptions.ShowWarnings && missing.Count > 0)
-            {
-                if (_warningsLeft > 0)
-                {
-                    Output.WriteLine($"{missing.Count} missing references in scene {potentialScene.LocalPath}");
-                    foreach (var brokenRef in missing.Distinct())
-                    {
-                        Output.WriteLine($"- {brokenRef}");
-                    }
-                    if (--_warningsLeft == 0)
-                    {
-                        Output.WriteLine("Too many scene errors. Further missing references will not be printed.");
-                    }
-                }
-            }
 
             var scanned = Interlocked.Increment(ref _scanned);
             reporter.Report(new ProgressInfo(_scanned, potentialScenesCount, potentialScene.LocalPath));
