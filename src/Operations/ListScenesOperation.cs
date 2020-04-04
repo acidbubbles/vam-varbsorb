@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Varbsorb.Models;
 
@@ -18,6 +20,8 @@ namespace Varbsorb.Operations
             TimeSpan.FromSeconds(10));
 
         private readonly IFileSystem _fs;
+        private readonly ConcurrentBag<SceneFile> _scenes = new ConcurrentBag<SceneFile>();
+        private int _scanned = 0;
 
         private int _warningsLeft = 100;
 
@@ -29,67 +33,19 @@ namespace Varbsorb.Operations
 
         public async Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter, ErrorReportingOptions warnings)
         {
-            var scenesScanned = 0;
-            var scenes = new List<SceneFile>();
-            var filesIndex = files.ToDictionary(f => f.Path, f => f);
+            var filesIndex = new ConcurrentDictionary<string, FreeFile>(files.ToDictionary(f => f.Path, f => f));
             using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
                 var potentialScenes = files
                     .Where(f => f.Extension == ".json")
                     .Where(f => !filter.IsFiltered(f.LocalPath))
                     .ToList();
-                foreach (var potentialScene in potentialScenes)
-                {
-                    var potentialSceneJson = await _fs.File.ReadAllTextAsync(potentialScene.Path);
-                    var potentialSceneReferences = _findFilesFastRegex.Matches(potentialSceneJson).Where(m => m.Success).Select(m => m.Groups["path"]);
-                    var sceneFolder = _fs.Path.GetDirectoryName(potentialScene.Path);
-                    var references = new List<SceneReference>();
-                    var missing = new HashSet<string>();
-                    foreach (var reference in potentialSceneReferences)
-                    {
-                        if (!reference.Success) continue;
-                        var refPath = reference.Value;
-                        if (refPath.Contains(":")) continue;
-                        refPath = refPath.NormalizePathSeparators();
-                        refPath = MigrateLegacyPaths(refPath);
-                        if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(sceneFolder, refPath)), out var f1))
-                        {
-                            references.Add(new SceneReference(f1, reference.Index, reference.Length));
-                        }
-                        else if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(vam, refPath)), out var f2))
-                        {
-                            references.Add(new SceneReference(f2, reference.Index, reference.Length));
-                        }
-                        else
-                        {
-                            missing.Add(refPath);
-                        }
-                    }
-                    var item = new SceneFile(potentialScene, references, missing.ToList());
-                    if (references.Count > 0)
-                        scenes.Add(item);
-                    if (warnings == ErrorReportingOptions.ShowWarnings && missing.Count > 0)
-                    {
-                        if (_warningsLeft > 0)
-                        {
-                            Output.WriteLine($"{missing.Count} missing references in scene {potentialScene.LocalPath}");
-                            foreach (var brokenRef in missing.Distinct())
-                            {
-                                Output.WriteLine($"- {brokenRef}");
-                            }
-                            if (--_warningsLeft == 0)
-                            {
-                                Output.WriteLine("Too many scene errors. Further missing references will not be printed.");
-                            }
-                        }
-                    }
-                    reporter.Report(new ProgressInfo(++scenesScanned, potentialScenes.Count, potentialScene.LocalPath));
-                }
+                await Task.WhenAll(potentialScenes.Select(s => ScanSceneAsync(vam, s, potentialScenes.Count, warnings, filesIndex, reporter)));
             }
 
-            Output.WriteLine($"Scanned {scenesScanned} scenes.");
+            Output.WriteLine($"Scanned {_scanned} scenes.");
 
-            return scenes;
+            return _scenes.ToList();
         }
 
         private static string MigrateLegacyPaths(string refPath)
@@ -99,6 +55,56 @@ namespace Varbsorb.Operations
             if (refPath.StartsWith(@"Import\morphs\", StringComparison.OrdinalIgnoreCase)) return @"Custom\Atom\Person\Morphs\" + refPath.Substring(@"Import\morphs\".Length);
             if (refPath.StartsWith(@"Textures\", StringComparison.OrdinalIgnoreCase)) return @"Custom\Atom\Person\Textures\" + refPath.Substring(@"Textures\".Length);
             return refPath;
+        }
+
+        private async Task ScanSceneAsync(string vam, FreeFile potentialScene, int potentialScenesCount, ErrorReportingOptions warnings, ConcurrentDictionary<string, FreeFile> filesIndex, ProgressReporter<ProgressInfo> reporter)
+        {
+            var potentialSceneJson = await _fs.File.ReadAllTextAsync(potentialScene.Path);
+            var potentialSceneReferences = _findFilesFastRegex.Matches(potentialSceneJson).Where(m => m.Success).Select(m => m.Groups["path"]);
+            var sceneFolder = _fs.Path.GetDirectoryName(potentialScene.Path);
+            var references = new List<SceneReference>();
+            var missing = new HashSet<string>();
+            foreach (var reference in potentialSceneReferences)
+            {
+                if (!reference.Success) continue;
+                var refPath = reference.Value;
+                if (refPath.Contains(":")) continue;
+                refPath = refPath.NormalizePathSeparators();
+                refPath = MigrateLegacyPaths(refPath);
+                if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(sceneFolder, refPath)), out var f1))
+                {
+                    references.Add(new SceneReference(f1, reference.Index, reference.Length));
+                }
+                else if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(vam, refPath)), out var f2))
+                {
+                    references.Add(new SceneReference(f2, reference.Index, reference.Length));
+                }
+                else
+                {
+                    missing.Add(refPath);
+                }
+            }
+            var item = new SceneFile(potentialScene, references, missing.ToList());
+            if (references.Count > 0)
+                _scenes.Add(item);
+            if (warnings == ErrorReportingOptions.ShowWarnings && missing.Count > 0)
+            {
+                if (_warningsLeft > 0)
+                {
+                    Output.WriteLine($"{missing.Count} missing references in scene {potentialScene.LocalPath}");
+                    foreach (var brokenRef in missing.Distinct())
+                    {
+                        Output.WriteLine($"- {brokenRef}");
+                    }
+                    if (--_warningsLeft == 0)
+                    {
+                        Output.WriteLine("Too many scene errors. Further missing references will not be printed.");
+                    }
+                }
+            }
+
+            var scanned = Interlocked.Increment(ref _scanned);
+            reporter.Report(new ProgressInfo(_scanned, potentialScenesCount, potentialScene.LocalPath));
         }
     }
 
