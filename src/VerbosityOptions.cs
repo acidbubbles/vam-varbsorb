@@ -1,6 +1,6 @@
 namespace Varbsorb
 {
-    public enum VerbosityOptions 
+    public enum VerbosityOptions
     {
         Default,
         Verbose
