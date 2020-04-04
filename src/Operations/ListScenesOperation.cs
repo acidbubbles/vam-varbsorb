@@ -43,7 +43,7 @@ namespace Varbsorb.Operations
                     .ToList();
 
                 var scanSceneBlock = new ActionBlock<FreeFile>(
-                    s => ScanSceneAsync(vam, s, potentialScenes.Count, warnings, filesIndex, reporter),
+                    s => ScanSceneAsync(vam, s, potentialScenes.Count, filesIndex, reporter),
                     new ExecutionDataflowBlockOptions
                     {
                         MaxDegreeOfParallelism = 4
@@ -97,7 +97,7 @@ namespace Varbsorb.Operations
             }
         }
 
-        private async Task ScanSceneAsync(string vam, FreeFile potentialScene, int potentialScenesCount, ErrorReportingOptions warnings, ConcurrentDictionary<string, FreeFile> filesIndex, ProgressReporter<ProgressInfo> reporter)
+        private async Task ScanSceneAsync(string vam, FreeFile potentialScene, int potentialScenesCount, ConcurrentDictionary<string, FreeFile> filesIndex, ProgressReporter<ProgressInfo> reporter)
         {
             var potentialSceneJson = await _fs.File.ReadAllTextAsync(potentialScene.Path);
             var potentialSceneReferences = _findFilesFastRegex.Matches(potentialSceneJson).Where(m => m.Success).Select(m => m.Groups["path"]);
