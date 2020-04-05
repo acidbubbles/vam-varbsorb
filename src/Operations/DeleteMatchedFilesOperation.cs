@@ -9,7 +9,7 @@ namespace Varbsorb.Operations
 {
     public class DeleteMatchedFilesOperation : DeleteOperationBase, IDeleteMatchedFilesOperation
     {
-        protected override string Name => "Delete matched files";
+        protected override string Name => "Delete duplicate files";
 
         public DeleteMatchedFilesOperation(IConsoleOutput output, IFileSystem fs, IRecycleBin recycleBin, ILogger logger)
             : base(output, fs, recycleBin, logger)

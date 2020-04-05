@@ -48,7 +48,7 @@ namespace Varbsorb.Operations
                 await matchPackageBlock.Completion;
             }
 
-            Output.WriteLine($"Matched {_matches.Count} files.");
+            Output.WriteLine($"Matched {_matches.Count} files to duplicates in var packages.");
 
             return _matches.ToList();
         }

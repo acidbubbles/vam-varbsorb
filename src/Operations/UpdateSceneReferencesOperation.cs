@@ -18,7 +18,8 @@ namespace Varbsorb.Operations
         private readonly IFileSystem _fs;
         private readonly ILogger _logger;
         private int _processed;
-        private int _updated;
+        private int _updatedReferences;
+        private int _updatedScenes;
 
         public UpdateSceneReferencesOperation(IConsoleOutput output, IFileSystem fs, ILogger logger)
             : base(output)
@@ -48,8 +49,8 @@ namespace Varbsorb.Operations
                 await processSceneBlock.Completion;
             }
 
-            if (execution == ExecutionOptions.Noop) Output.WriteLine($"Skipped updating {_updated} scenes since --noop was specified.");
-            else Output.WriteLine($"Updated {_updated} scenes.");
+            if (execution == ExecutionOptions.Noop) Output.WriteLine($"Skipped updating {_updatedScenes} scenes since --noop was specified.");
+            else Output.WriteLine($"Updated {_updatedReferences} references in {_updatedScenes} scenes.");
         }
 
         private static FreeFilePackageMatch FindBestMatch(List<FreeFilePackageMatch> matches)
@@ -75,12 +76,13 @@ namespace Varbsorb.Operations
                     var sb = await sceneJsonTask.Value;
                     sb.Remove(sceneRef.Index, sceneRef.Length);
                     sb.Insert(sceneRef.Index, $"{match.Package.Name.Author}.{match.Package.Name.Name}.{match.Package.Name.Version}:/{match.PackageFile.LocalPath.Replace('\\', '/')}");
+                    Interlocked.Increment(ref _updatedReferences);
                 }
             }
             if (sceneJsonTask.IsValueCreated)
             {
                 var sb = await sceneJsonTask.Value;
-                Interlocked.Increment(ref _updated);
+                Interlocked.Increment(ref _updatedScenes);
                 if (execution == ExecutionOptions.Noop)
                 {
                     _logger.Log($"[WRITE(NOOP)] {scene.File.Path}");

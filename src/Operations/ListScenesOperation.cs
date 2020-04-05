@@ -58,7 +58,7 @@ namespace Varbsorb.Operations
                 await scanSceneBlock.Completion;
             }
 
-            Output.WriteLine($"Scanned {_scanned} scenes.");
+            Output.WriteLine($"Scanned {_scanned} scenes for references.");
 
             var scenes = _scenes.OrderBy(s => s.File.LocalPath).ToList();
 

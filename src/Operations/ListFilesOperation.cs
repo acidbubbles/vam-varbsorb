@@ -33,7 +33,7 @@ namespace Varbsorb.Operations
                 GroupMorphsVmi(files);
             }
 
-            Output.WriteLine($"Scanned {files.Count} files.");
+            Output.WriteLine($"Scanned {files.Count} files in the Saves and Custom folders.");
 
             return files;
         }

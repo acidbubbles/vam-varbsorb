@@ -9,7 +9,7 @@ namespace Varbsorb.Operations
 {
     public class DeleteOrphanMorphFilesOperation : DeleteOperationBase, IDeleteOrphanMorphFilesOperation
     {
-        protected override string Name => "Delete orphan morph files";
+        protected override string Name => "Delete orphan morph files (vmi/vmb)";
 
         public DeleteOrphanMorphFilesOperation(IConsoleOutput output, IFileSystem fs, IRecycleBin recycleBin, ILogger logger)
             : base(output, fs, recycleBin, logger)
