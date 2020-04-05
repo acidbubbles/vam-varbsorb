@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Security;
 using System.Threading.Tasks;
 using Varbsorb.Models;
 
@@ -40,7 +41,14 @@ namespace Varbsorb.Operations
                 .EnumerateFiles(_fs.Path.Combine(vam, folder), "*.*", SearchOption.AllDirectories)
                 // Folders starting with a dot will not be cleaned, it would be better to avoid browsing but hey.
                 .Where(f => !f.Contains(@"\."))
-                .Select(f => new FreeFile(f, f.RelativeTo(vam)));
+                .Select(f => new FreeFile(f, f.RelativeTo(vam)))
+                .Tap(f =>
+                {
+                    if (f.Extension == ".exe")
+                    {
+                        throw new SecurityException($"An executable file was found in your '{vam}' folder: '{f.Path}'");
+                    }
+                });
         }
 
         private async Task GroupCslistRefs(string vam, List<FreeFile> files)
