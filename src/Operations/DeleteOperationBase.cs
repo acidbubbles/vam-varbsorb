@@ -10,6 +10,7 @@ namespace Varbsorb.Operations
     public abstract class DeleteOperationBase : OperationBase
     {
         private readonly IRecycleBin _recycleBin;
+        private readonly object _sync = new object();
 
         protected IFileSystem FileSystem { get; }
 
@@ -39,7 +40,10 @@ namespace Varbsorb.Operations
                 {
                     if (verbosity == VerbosityOptions.Verbose) Output.WriteLine($"{(execution == ExecutionOptions.Noop ? "[NOOP]" : "DELETE")}: {file.LocalPath}");
                     if (execution != ExecutionOptions.Noop) DeleteFile(file.Path, delete);
-                    files.Remove(file);
+                    lock (_sync)
+                    {
+                        files.Remove(file);
+                    }
                     reporter.Report(new ProgressInfo(++processed, filesToDelete.Count, file.LocalPath));
                 }
 

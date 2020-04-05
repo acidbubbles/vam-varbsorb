@@ -45,7 +45,7 @@ namespace Varbsorb.Operations
 
         private async Task GroupCslistRefs(string vam, List<FreeFile> files)
         {
-            var filesToRemove = new List<FreeFile>();
+            var filesMovedAsChildren = new List<FreeFile>();
             var filesIndex = files.Where(f => f.Extension == ".cs").ToDictionary(f => f.Path, f => f);
             foreach (var cslist in files.Where(f => f.Extension == ".cslist"))
             {
@@ -57,16 +57,16 @@ namespace Varbsorb.Operations
                     if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(cslistFolder, cslistRef)), out var f1))
                     {
                         cslist.Children.Add(f1);
-                        filesToRemove.Add(f1);
+                        filesMovedAsChildren.Add(f1);
                     }
                     else if (filesIndex.TryGetValue(_fs.Path.GetFullPath(_fs.Path.Combine(vam, cslistRef)), out var f2))
                     {
                         cslist.Children.Add(f2);
-                        filesToRemove.Add(f2);
+                        filesMovedAsChildren.Add(f2);
                     }
                 }
             }
-            filesToRemove.ForEach(f => files.Remove(f));
+            filesMovedAsChildren.ForEach(f => files.Remove(f));
         }
     }
 
