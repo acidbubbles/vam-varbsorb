@@ -37,7 +37,7 @@ namespace Varbsorb
             await _operationsFactory.Get<IDeleteMatchedFilesOperation>().ExecuteAsync(freeFiles, matches, delete, filter, verbosity, execution);
             await _operationsFactory.Get<IDeleteOrphanMorphFilesOperation>().ExecuteAsync(freeFiles, delete, filter, verbosity, execution);
 
-            _output.WriteLine($"Cleanup complete in {sw.Elapsed.Seconds:0.00} seconds.");
+            _output.WriteLine($"Cleanup complete in {sw.Elapsed.Milliseconds / 1000f:0.00} seconds.");
         }
 
         public IFilter BuildFilter(string vam, string[]? include, string[]? exclude)
