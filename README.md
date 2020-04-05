@@ -25,6 +25,8 @@ Arguments:
 - `--warnings`: Print missing references found while scanning (usually broken scenes)
 - `--noop`: Does not actually delete or update anything
 
+Note that if you don't specify the `--vam` argument, it will first check if it's in the same folder as `VaM.exe`. So if you have no idea how to run a command line tool, you can drop it in the Virt-A-Mate install folder and doube-click on it.
+
 ## Gotchas
 
 This will delete files on your system. Varbsorb tries very hard to ensure it's as safe as possible, but if you have symbolic links in your Saves or Custom folder, Varbsorb will follow them. You might want to make a backup of your Virt-A-Mate Saves and Custom folders, just in case (or add them to Git).

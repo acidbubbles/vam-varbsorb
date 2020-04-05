@@ -8,7 +8,7 @@ namespace Varbsorb.Operations
 {
     public class DeleteOrphanMorphFilesOperation : DeleteOperationBase, IDeleteOrphanMorphFilesOperation
     {
-        protected override string Name => "Delete matched files";
+        protected override string Name => "Delete orphan morph files";
 
         public DeleteOrphanMorphFilesOperation(IConsoleOutput output, IFileSystem fs, IRecycleBin recycleBin)
             : base(output, fs, recycleBin)
