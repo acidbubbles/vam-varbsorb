@@ -71,13 +71,11 @@ namespace Varbsorb.Operations
                 .Where(ff => ff.Hash == packageFile.Hash)
                 .Where(ff =>
                 {
-                    if (ff.Children != null)
+                    if (ff.Children == null || ff.Children.Count == 0) return true;
+                    foreach (var child in ff.Children)
                     {
-                        foreach (var child in ff.Children)
-                        {
-                            if (!package.Files.Any(pf => pf.FilenameLower == child.FilenameLower && pf.Hash == child.Hash))
-                                return false;
-                        }
+                        if (!package.Files.Any(pf => pf.FilenameLower == child.FilenameLower && pf.Hash == child.Hash))
+                            return false;
                     }
                     return true;
                 })
