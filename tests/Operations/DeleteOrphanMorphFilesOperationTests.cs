@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
+using Varbsorb.Logging;
 using Varbsorb.Models;
 
 namespace Varbsorb.Operations
@@ -19,7 +20,7 @@ namespace Varbsorb.Operations
                 MockFile(@"Saves\scene\Custom\Person\male\morph1.vmi", ""),
                 MockFile(@"Saves\Filtered\morph1.vmi", "")
             };
-            var op = new DeleteOrphanMorphFilesOperation(_consoleOutput.Object, _fs, Mock.Of<IRecycleBin>());
+            var op = new DeleteOrphanMorphFilesOperation(_consoleOutput.Object, _fs, Mock.Of<IRecycleBin>(), Mock.Of<ILogger>());
 
             await op.ExecuteAsync(files, DeleteOptions.Permanent, new ExcludeFilter(new[] { @"Saves\Filtered" }), VerbosityOptions.Default, ExecutionOptions.Default);
 

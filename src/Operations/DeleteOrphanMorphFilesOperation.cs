@@ -2,6 +2,7 @@
 using System.IO.Abstractions;
 using System.Linq;
 using System.Threading.Tasks;
+using Varbsorb.Logging;
 using Varbsorb.Models;
 
 namespace Varbsorb.Operations
@@ -10,8 +11,8 @@ namespace Varbsorb.Operations
     {
         protected override string Name => "Delete orphan morph files";
 
-        public DeleteOrphanMorphFilesOperation(IConsoleOutput output, IFileSystem fs, IRecycleBin recycleBin)
-            : base(output, fs, recycleBin)
+        public DeleteOrphanMorphFilesOperation(IConsoleOutput output, IFileSystem fs, IRecycleBin recycleBin, ILogger logger)
+            : base(output, fs, recycleBin, logger)
         {
         }
 

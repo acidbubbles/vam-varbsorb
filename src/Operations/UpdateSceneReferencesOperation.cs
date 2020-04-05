@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using Varbsorb.Logging;
 using Varbsorb.Models;
 
 namespace Varbsorb.Operations
@@ -15,12 +16,14 @@ namespace Varbsorb.Operations
         protected override string Name => "Update scene references";
 
         private readonly IFileSystem _fs;
+        private readonly ILogger _logger;
         private int _processed;
 
-        public UpdateSceneReferencesOperation(IConsoleOutput output, IFileSystem fs)
+        public UpdateSceneReferencesOperation(IConsoleOutput output, IFileSystem fs, ILogger logger)
             : base(output)
         {
             _fs = fs;
+            _logger = logger;
         }
 
         public async Task ExecuteAsync(IList<SceneFile> scenes, IList<FreeFilePackageMatch> matches, ExecutionOptions execution)
@@ -77,7 +80,10 @@ namespace Varbsorb.Operations
             {
                 var sb = await sceneJsonTask.Value;
                 if (execution != ExecutionOptions.Noop)
+                {
+                    _logger.Log($"[WRITE] {scene.File.Path}");
                     await _fs.File.WriteAllTextAsync(scene.File.Path, sb.ToString());
+                }
             }
         }
     }

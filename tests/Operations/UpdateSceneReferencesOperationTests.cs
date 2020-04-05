@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
+using Moq;
 using NUnit.Framework;
+using Varbsorb.Logging;
 using Varbsorb.Models;
 
 namespace Varbsorb.Operations
@@ -13,7 +15,7 @@ namespace Varbsorb.Operations
         public async Task CanReplacePaths()
         {
             _fs.AddFile(@$"{_vamPath}\Saves\scene\MyScene.json", new MockFileData(@"{""id"":""Custom\Scripts\Script1.cs"", ""path"":""Script1.cs""}"));
-            var op = new UpdateSceneReferencesOperation(_consoleOutput.Object, _fs);
+            var op = new UpdateSceneReferencesOperation(_consoleOutput.Object, _fs, Mock.Of<ILogger>());
             var scriptFile = new FreeFile("", @"Custom\Scripts\MyScript.cs");
             var scenes = GivenFiles(@"Saves\scene\MyScene.json").Select(f => new SceneFile(f, new List<SceneReference>
                 {
@@ -36,7 +38,7 @@ namespace Varbsorb.Operations
         public async Task SelectsMostRecentAndSmall()
         {
             _fs.AddFile(@$"{_vamPath}\Saves\scene\MyScene.json", new MockFileData(@"{""id"":""Custom\Scripts\Script1.cs""}"));
-            var op = new UpdateSceneReferencesOperation(_consoleOutput.Object, _fs);
+            var op = new UpdateSceneReferencesOperation(_consoleOutput.Object, _fs, Mock.Of<ILogger>());
             var scriptFile = new FreeFile("", @"Custom\Scripts\MyScript.cs");
             var scenes = GivenFiles(@"Saves\scene\MyScene.json").Select(f => new SceneFile(f, new List<SceneReference>
                 {

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
+using Varbsorb.Logging;
 using Varbsorb.Models;
 
 namespace Varbsorb.Operations
@@ -25,7 +26,7 @@ namespace Varbsorb.Operations
                      new[] { scriptFile, scriptListFile }
                 )
             };
-            var op = new DeleteMatchedFilesOperation(_consoleOutput.Object, _fs, Mock.Of<IRecycleBin>());
+            var op = new DeleteMatchedFilesOperation(_consoleOutput.Object, _fs, Mock.Of<IRecycleBin>(), Mock.Of<ILogger>());
 
             await op.ExecuteAsync(files, matches, DeleteOptions.Permanent, new ExcludeFilter(new[] { @"Saves\Filtered" }), VerbosityOptions.Default, ExecutionOptions.Default);
 

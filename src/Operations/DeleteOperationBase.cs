@@ -4,6 +4,7 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Varbsorb.Logging;
 using Varbsorb.Models;
 
 namespace Varbsorb.Operations
@@ -12,14 +13,16 @@ namespace Varbsorb.Operations
     {
         protected IFileSystem FileSystem { get; }
         private readonly IRecycleBin _recycleBin;
+        private readonly ILogger _logger;
         private readonly object _sync = new object();
         private int _processed = 0;
 
-        public DeleteOperationBase(IConsoleOutput output, IFileSystem fs, IRecycleBin recycleBin)
+        public DeleteOperationBase(IConsoleOutput output, IFileSystem fs, IRecycleBin recycleBin, ILogger logger)
             : base(output)
         {
             FileSystem = fs;
             _recycleBin = recycleBin;
+            _logger = logger;
         }
 
         public Task DeleteAsync(IList<FreeFile> files, ISet<FreeFile> filesToDelete, DeleteOptions delete, VerbosityOptions verbosity, ExecutionOptions execution)
@@ -71,10 +74,12 @@ namespace Varbsorb.Operations
         {
             if (delete == DeleteOptions.Permanent)
             {
+                _logger.Log($"[DELETE] {path}");
                 FileSystem.File.Delete(path);
             }
             else
             {
+                _logger.Log($"[RECYCLE] {path}");
                 _recycleBin.Send(path);
             }
         }

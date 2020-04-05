@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/src/bin/Debug/netcoreapp3.1/varbsorb.dll",
-            "args": ["--vam", "${input:vam}"],
+            "args": ["--vam", "${input:vam}", "--log", "${env:TEMP}\\varbsorb.txt"],
             "cwd": "${workspaceFolder}/src",
             "console": "externalTerminal",
             "stopAtEntry": false

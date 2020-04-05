@@ -3,6 +3,7 @@ using System.IO.Abstractions;
 using System.Threading.Tasks;
 using Autofac;
 using Varbsorb.Hashing;
+using Varbsorb.Logging;
 using Varbsorb.Operations;
 
 namespace Varbsorb
@@ -19,6 +20,7 @@ namespace Varbsorb
         /// <param name="verbose">Prints detailed output.</param>
         /// <param name="warnings">Prints broken scene references.</param>
         /// <param name="noop">Do not actually delete or write anything, just print the result.</param>
+        /// <param name="log">Log the deleted and modified files list to a file path.</param>
         private static async Task<int> Main(
             string vam,
             string[]? include = null,
@@ -26,9 +28,10 @@ namespace Varbsorb
             bool permanent = false,
             bool verbose = false,
             bool warnings = false,
-            bool noop = false)
+            bool noop = false,
+            string? log = null)
         {
-            var container = Configure();
+            var container = Configure(log);
             var runtime = container.Resolve<Varbsorber>();
             try
             {
@@ -45,26 +48,43 @@ namespace Varbsorb
             catch (VarbsorberException exc)
             {
                 Console.Error.WriteLine(exc.Message);
+                return 1;
             }
-            return 1;
+            finally
+            {
+                var logger = container.Resolve<ILogger>();
+                if (logger.Enabled)
+                {
+                    container.Resolve<IConsoleOutput>().WriteLine("Writing log file.");
+                    await logger.DumpAsync();
+                }
+            }
         }
 
-        private static IContainer Configure()
+        private static IContainer Configure(string? log)
         {
             var builder = new ContainerBuilder();
-            builder.RegisterType<ConsoleOutput>().As<IConsoleOutput>();
-            builder.RegisterType<FileSystem>().As<IFileSystem>();
+
+            builder.RegisterType<ConsoleOutput>().As<IConsoleOutput>().SingleInstance();
+            builder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();
+            if (string.IsNullOrEmpty(log))
+                builder.RegisterType<NullLogger>().As<ILogger>().SingleInstance();
+            else
+                builder.Register(ctx => new WriteOnExitLogger(ctx.Resolve<IFileSystem>(), log)).As<ILogger>().SingleInstance();
+            builder.RegisterType<SHA1HashingAlgo>().As<IHashingAlgo>().SingleInstance();
+            builder.RegisterType<RecycleBin>().As<IRecycleBin>().SingleInstance();
+
             builder.RegisterType<ListVarPackagesOperation>().As<IListVarPackagesOperation>();
-            builder.RegisterType<SHA1HashingAlgo>().As<IHashingAlgo>();
-            builder.RegisterType<RecycleBin>().As<IRecycleBin>();
             builder.RegisterType<ListFilesOperation>().As<IListFilesOperation>();
             builder.RegisterType<MatchFilesToPackagesOperation>().As<IMatchFilesToPackagesOperation>();
             builder.RegisterType<ListScenesOperation>().As<IListScenesOperation>();
             builder.RegisterType<DeleteMatchedFilesOperation>().As<IDeleteMatchedFilesOperation>();
             builder.RegisterType<UpdateSceneReferencesOperation>().As<IUpdateSceneReferencesOperation>();
             builder.RegisterType<DeleteOrphanMorphFilesOperation>().As<IDeleteOrphanMorphFilesOperation>();
+
             builder.RegisterType<OperationsFactory>().As<IOperationsFactory>();
             builder.RegisterType<Varbsorber>();
+
             return builder.Build();
         }
     }
