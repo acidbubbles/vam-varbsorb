@@ -26,7 +26,7 @@ namespace Varbsorb.Operations
         protected void CompleteProgress()
         {
             Output.WriteAndReset("");
-            Output.CursorVisible = false;
+            Output.CursorVisible = true;
         }
 
         public class ProgressInfo
