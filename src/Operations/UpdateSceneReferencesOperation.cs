@@ -18,6 +18,7 @@ namespace Varbsorb.Operations
         private readonly IFileSystem _fs;
         private readonly ILogger _logger;
         private int _processed;
+        private int _updated;
 
         public UpdateSceneReferencesOperation(IConsoleOutput output, IFileSystem fs, ILogger logger)
             : base(output)
@@ -47,8 +48,8 @@ namespace Varbsorb.Operations
                 await processSceneBlock.Completion;
             }
 
-            if (execution == ExecutionOptions.Noop) Output.WriteLine($"Skipped updating {_processed} scenes since --noop was specified.");
-            else Output.WriteLine($"Updated {_processed} scenes.");
+            if (execution == ExecutionOptions.Noop) Output.WriteLine($"Skipped updating {_updated} scenes since --noop was specified.");
+            else Output.WriteLine($"Updated {_updated} scenes.");
         }
 
         private static FreeFilePackageMatch FindBestMatch(List<FreeFilePackageMatch> matches)
@@ -79,6 +80,7 @@ namespace Varbsorb.Operations
             if (sceneJsonTask.IsValueCreated)
             {
                 var sb = await sceneJsonTask.Value;
+                Interlocked.Increment(ref _updated);
                 if (execution != ExecutionOptions.Noop)
                 {
                     _logger.Log($"[WRITE] {scene.File.Path}");
