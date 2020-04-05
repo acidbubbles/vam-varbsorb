@@ -24,8 +24,7 @@ namespace Varbsorb.Operations
                 .Select(f => (basePath: f.LocalPath.Substring(0, f.LocalPath.Length - f.Extension.Length), file: f))
                 .GroupBy(x => x.basePath)
                 .Where(g => g.Count() == 1)
-                .Select(g => g.Single().file)
-                .Where(f => f.Extension == ".vmi"));
+                .Select(g => g.Single().file));
 
             await DeleteAsync(files, filesToDelete, delete, verbosity, execution);
         }
