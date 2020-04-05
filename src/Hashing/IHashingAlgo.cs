@@ -2,7 +2,7 @@ using System;
 
 namespace Varbsorb.Hashing
 {
-    public interface IHashingAlgo : IDisposable
+    public interface IHashingAlgo
     {
         string GetHash(byte[] bytes);
     }
