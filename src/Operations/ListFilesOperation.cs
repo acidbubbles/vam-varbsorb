@@ -30,6 +30,7 @@ namespace Varbsorb.Operations
                 files.AddRange(ScanFolder(reporter, vam, "Custom"));
                 files.AddRange(ScanFolder(reporter, vam, "Saves"));
                 await GroupCslistRefs(vam, files);
+                GroupMorphsVmi(files);
             }
 
             Output.WriteLine($"Scanned {files.Count} files.");
@@ -76,6 +77,23 @@ namespace Varbsorb.Operations
                         filesMovedAsChildren.Add(f2);
                     }
                 }
+            }
+            filesMovedAsChildren.ForEach(f => files.Remove(f));
+        }
+
+        private void GroupMorphsVmi(List<FreeFile> files)
+        {
+            var filesMovedAsChildren = new List<FreeFile>();
+            var pairs = files
+                .Where(f => f.Extension == ".vmi" || f.Extension == ".vmb")
+                .Select(f => (basePath: f.LocalPath.Substring(0, f.LocalPath.Length - f.Extension.Length), file: f))
+                .GroupBy(x => x.basePath)
+                .Where(g => g.Count() == 2)
+                .Select(g => (vmi: g.Single(f => f.file.Extension == ".vmi").file, vmb: g.Single(f => f.file.Extension == ".vmb").file));
+            foreach (var (vmi, vmb) in pairs)
+            {
+                vmi.Children = new List<FreeFile> { vmb };
+                filesMovedAsChildren.Add(vmb);
             }
             filesMovedAsChildren.ForEach(f => files.Remove(f));
         }
