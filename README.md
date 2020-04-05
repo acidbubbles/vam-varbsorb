@@ -18,12 +18,13 @@ This will scan your Virt-A-Mate `Saves` and `Custom` folders as well as the `.va
 
 Arguments:
 
-- `--vam`: The root path of Virt-A-Mate
-- `--include`: Limit affected files to this path prefix, relative to vam (affects files that would be deleted or updated)
-- `--exclude`: Paths to skip, relative to vam (affects files that would be deleted or updated)
-- `--verbose`: Print more information
-- `--warnings`: Print missing references found while scanning (usually broken scenes)
-- `--noop`: Does not actually delete or update anything
+- `--vam`: The root path of Virt-A-Mate.
+- `--include`: Limit affected files to this path prefix, relative to vam (affects files that would be deleted or updated).
+- `--exclude`: Paths to skip, relative to vam (affects files that would be deleted or updated).
+- `--verbose`: Print more information.
+- `--warnings`: Print missing references found while scanning (usually broken scenes).
+- `--noop`: Does not actually delete or update anything.
+- `--log`: Log file operations to a file.
 
 Note that if you don't specify the `--vam` argument, it will first check if it's in the same folder as `VaM.exe`. So if you have no idea how to run a command line tool, you can drop it in the Virt-A-Mate install folder and doube-click on it.
 
