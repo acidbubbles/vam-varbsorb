@@ -22,6 +22,7 @@ namespace Varbsorb.Operations
 
         private readonly ConcurrentBag<VarPackage> _packages = new ConcurrentBag<VarPackage>();
         private int _scanned = 0;
+        private int _files = 0;
 
         public ListVarPackagesOperation(IConsoleOutput output, IFileSystem fs, IHashingAlgo hashingAlgo)
             : base(output)
@@ -52,7 +53,7 @@ namespace Varbsorb.Operations
                 await scanPackageBlock.Completion;
             }
 
-            Output.WriteLine($"Scanned {_packages.Count} packages.");
+            Output.WriteLine($"Scanned {_files} files in {_packages.Count} var packages.");
 
             return _packages.ToList();
         }
@@ -71,6 +72,7 @@ namespace Varbsorb.Operations
                 if (entry.FullName == "meta.json") continue;
                 var packageFile = await ReadPackageFileAsync(entry);
                 files.Add(packageFile);
+                Interlocked.Increment(ref _files);
             }
             if (files.Count > 0)
                 _packages.Add(new VarPackage(new VarPackageName(filename), file, files));
