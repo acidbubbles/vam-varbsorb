@@ -10,10 +10,11 @@ namespace Varbsorb
             var shf = new SHFILEOPSTRUCT
             {
                 wFunc = FO_DELETE,
-                fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION,
-                pFrom = path
+                fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT,
+                pFrom = $"{path}\0\0"
             };
-            SHFileOperation(ref shf);
+            var result = SHFileOperation(ref shf);
+            if (result != 0) throw new Exception($"Error while sending {path} to the recycle bin: {result}. See https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499- or https://docs.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shfileoperationa for the list of errors.");
         }
 
 #pragma warning disable SA1307
