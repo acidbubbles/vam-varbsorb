@@ -18,7 +18,7 @@ namespace Varbsorb.Operations
         private readonly IFileSystem _fs;
         private readonly IHashingAlgo _hashingAlgo;
         private readonly ConcurrentBag<FreeFilePackageMatch> _matches = new ConcurrentBag<FreeFilePackageMatch>();
-        private int _processed = 0;
+        private int _processed;
 
         public MatchFilesToPackagesOperation(IConsoleOutput output, IFileSystem fs, IHashingAlgo hashingAlgo)
             : base(output)
@@ -57,8 +57,8 @@ namespace Varbsorb.Operations
         {
             await Task.WhenAll(package.Files.Select(f => MatchPackageFileAsync(package, f, freeFilesSet)));
 
-            var scanned = Interlocked.Increment(ref _processed);
-            reporter.Report(new ProgressInfo(_processed, packagesCount, package.Name.Filename));
+            var processed = Interlocked.Increment(ref _processed);
+            reporter.Report(new ProgressInfo(processed, packagesCount, package.Name.Filename));
         }
 
         private async Task MatchPackageFileAsync(VarPackage package, VarPackageFile packageFile, ConcurrentDictionary<string, List<FreeFile>> freeFilesSet)

@@ -34,9 +34,9 @@ namespace Varbsorb
             _exclude = exclude;
         }
 
-        public bool IsFiltered(string path)
+        public bool IsFiltered(string localPath)
         {
-            return _exclude.Any(f => path.StartsWith(f));
+            return _exclude.Any(f => localPath.StartsWith(f));
         }
     }
 
@@ -51,10 +51,10 @@ namespace Varbsorb
             _exclude = exclude;
         }
 
-        public bool IsFiltered(string path)
+        public bool IsFiltered(string localPath)
         {
-            if (_exclude.Any(f => path.StartsWith(f))) return true;
-            return !_include.Any(f => path.StartsWith(f));
+            if (_exclude.Any(f => localPath.StartsWith(f))) return true;
+            return !_include.Any(f => localPath.StartsWith(f));
         }
     }
 

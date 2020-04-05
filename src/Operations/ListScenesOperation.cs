@@ -129,7 +129,7 @@ namespace Varbsorb.Operations
                 _scenes.Add(item);
 
             var scanned = Interlocked.Increment(ref _scanned);
-            reporter.Report(new ProgressInfo(_scanned, potentialScenesCount, potentialScene.LocalPath));
+            reporter.Report(new ProgressInfo(scanned, potentialScenesCount, potentialScene.LocalPath));
         }
     }
 

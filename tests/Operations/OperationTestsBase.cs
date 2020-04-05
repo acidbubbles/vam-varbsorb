@@ -21,7 +21,7 @@ namespace Varbsorb.Operations
             _fs = new MockFileSystem();
         }
 
-        protected IList<FreeFile> GivenFiles(params string[] localPaths)
+        protected static IList<FreeFile> GivenFiles(params string[] localPaths)
         {
             return localPaths.Select(GivenFile).ToList();
         }

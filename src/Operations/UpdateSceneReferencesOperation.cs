@@ -54,7 +54,7 @@ namespace Varbsorb.Operations
             else Output.WriteLine($"Updated {scenesProcessed} scenes.");
         }
 
-        private FreeFilePackageMatch FindBestMatch(List<FreeFilePackageMatch> matches)
+        private static FreeFilePackageMatch FindBestMatch(List<FreeFilePackageMatch> matches)
         {
             // Find the most recent and small package
             return matches
