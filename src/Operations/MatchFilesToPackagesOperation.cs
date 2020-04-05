@@ -57,7 +57,7 @@ namespace Varbsorb.Operations
         {
             reporter.Report(new ProgressInfo(Interlocked.Increment(ref _processed), packagesCount, package.Name.Filename));
 
-            await Task.WhenAll(package.Files.Select(f => MatchPackageFileAsync(package, f, freeFilesSet)));
+            await Task.WhenAll(package.Files.Select(async f => await MatchPackageFileAsync(package, f, freeFilesSet)));
         }
 
         private async Task MatchPackageFileAsync(VarPackage package, VarPackageFile packageFile, ConcurrentDictionary<string, List<FreeFile>> freeFilesSet)
@@ -65,7 +65,7 @@ namespace Varbsorb.Operations
             if (!freeFilesSet.TryGetValue(packageFile.FilenameLower, out var matchingFreeFiles))
                 return;
 
-            await Task.WhenAll(matchingFreeFiles.Where(m => m.Hash == null).Select(m => ComputeHashAsync(m)));
+            await Task.WhenAll(matchingFreeFiles.SelectMany(m => m.SelfAndChildren()).Where(m => m.Hash == null).Select(async m => await ComputeHashAsync(m)));
 
             var matchedFreeFiles = matchingFreeFiles
                 .Where(ff => ff.Hash == packageFile.Hash)

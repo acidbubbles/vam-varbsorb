@@ -17,10 +17,15 @@ namespace Varbsorb.Models
             Path = path;
         }
 
-        internal IEnumerable<FreeFile> SelfAndChildren()
+        public IEnumerable<FreeFile> SelfAndChildren()
         {
             if (Children == null) return new[] { this };
             return Children.Concat(new[] { this });
+        }
+
+        public override string ToString()
+        {
+            return LocalPath;
         }
     }
 }

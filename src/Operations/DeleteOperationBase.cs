@@ -65,7 +65,10 @@ namespace Varbsorb.Operations
                 }
             }
 
-            Output.WriteLine($"{Name}: Deleted {filesToDelete.Count} files. Estimated {mbSaved:0.00}MB saved.");
+            if (execution == ExecutionOptions.Noop)
+                Output.WriteLine($"{Name}: Did not delete {filesToDelete.Count} files since --noop was specified. Estimated {mbSaved:0.00}MB would have been saved.");
+            else
+                Output.WriteLine($"{Name}: Deleted {filesToDelete.Count} files. Estimated {mbSaved:0.00}MB saved.");
 
             return Task.CompletedTask;
         }
