@@ -60,6 +60,8 @@ namespace Varbsorb.Operations
         private async Task ExecuteOneAsync(IProgress<ProgressInfo> reporter, int packageFilesCount, string file)
         {
             var filename = _fs.Path.GetFileName(file);
+            reporter.Report(new ProgressInfo(Interlocked.Increment(ref _scanned), packageFilesCount, filename));
+
             var files = new List<VarPackageFile>();
             using var stream = _fs.File.OpenRead(file);
             using var archive = new ZipArchive(stream);
@@ -72,9 +74,6 @@ namespace Varbsorb.Operations
             }
             if (files.Count > 0)
                 _packages.Add(new VarPackage(new VarPackageName(filename), file, files));
-
-            var scanned = Interlocked.Increment(ref _scanned);
-            reporter.Report(new ProgressInfo(scanned, packageFilesCount, filename));
         }
 
         private async Task<VarPackageFile> ReadPackageFileAsync(ZipArchiveEntry entry)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Varbsorb.Models;
 
@@ -9,10 +10,10 @@ namespace Varbsorb.Operations
 {
     public abstract class DeleteOperationBase : OperationBase
     {
+        protected IFileSystem FileSystem { get; }
         private readonly IRecycleBin _recycleBin;
         private readonly object _sync = new object();
-
-        protected IFileSystem FileSystem { get; }
+        private int _processed = 0;
 
         public DeleteOperationBase(IConsoleOutput output, IFileSystem fs, IRecycleBin recycleBin)
             : base(output)
@@ -33,18 +34,19 @@ namespace Varbsorb.Operations
             }
 
             var mbSaved = filesToDelete.Sum(f => (long)(f.Size ?? 0)) / 1024f / 1024f;
+
             using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
-                var processed = 0;
                 foreach (var file in filesToDelete)
                 {
+                    reporter.Report(new ProgressInfo(Interlocked.Increment(ref _processed), filesToDelete.Count, file.LocalPath));
+
                     if (verbosity == VerbosityOptions.Verbose) Output.WriteLine($"{(execution == ExecutionOptions.Noop ? "[NOOP]" : "DELETE")}: {file.LocalPath}");
                     if (execution != ExecutionOptions.Noop) DeleteFile(file.Path, delete);
                     lock (_sync)
                     {
                         files.Remove(file);
                     }
-                    reporter.Report(new ProgressInfo(++processed, filesToDelete.Count, file.LocalPath));
                 }
 
                 if (execution != ExecutionOptions.Noop)

@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Security;
+using System.Threading;
 using System.Threading.Tasks;
 using Varbsorb.Models;
 
@@ -12,6 +14,7 @@ namespace Varbsorb.Operations
     {
         protected override string Name => "Scan files";
         private readonly IFileSystem _fs;
+        private int _scanned = 0;
 
         public ListFilesOperation(IConsoleOutput output, IFileSystem fs)
             : base(output)
@@ -24,9 +27,8 @@ namespace Varbsorb.Operations
             var files = new List<FreeFile>();
             using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
-                var counter = 0;
-                files.AddRange(ScanFolder(vam, "Custom").Tap(f => reporter.Report(new ProgressInfo(++counter, 0, f.LocalPath))));
-                files.AddRange(ScanFolder(vam, "Saves").Tap(f => reporter.Report(new ProgressInfo(++counter, 0, f.LocalPath))));
+                files.AddRange(ScanFolder(reporter, vam, "Custom"));
+                files.AddRange(ScanFolder(reporter, vam, "Saves"));
                 await GroupCslistRefs(vam, files);
             }
 
@@ -35,13 +37,14 @@ namespace Varbsorb.Operations
             return files;
         }
 
-        private IEnumerable<FreeFile> ScanFolder(string vam, string folder)
+        private IEnumerable<FreeFile> ScanFolder(IProgress<ProgressInfo> reporter, string vam, string folder)
         {
             return _fs.Directory
                 .EnumerateFiles(_fs.Path.Combine(vam, folder), "*.*", SearchOption.AllDirectories)
                 // Folders starting with a dot will not be cleaned, it would be better to avoid browsing but hey.
                 .Where(f => !f.Contains(@"\."))
                 .Select(f => new FreeFile(f, f.RelativeTo(vam)))
+                .Tap(f => reporter.Report(new ProgressInfo(Interlocked.Increment(ref _scanned), 0, f.LocalPath)))
                 .Tap(f =>
                 {
                     if (f.Extension == ".exe")

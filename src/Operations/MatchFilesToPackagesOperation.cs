@@ -55,10 +55,9 @@ namespace Varbsorb.Operations
 
         private async Task MatchPackageAsync(IProgress<ProgressInfo> reporter, VarPackage package, int packagesCount, ConcurrentDictionary<string, List<FreeFile>> freeFilesSet)
         {
-            await Task.WhenAll(package.Files.Select(f => MatchPackageFileAsync(package, f, freeFilesSet)));
+            reporter.Report(new ProgressInfo(Interlocked.Increment(ref _processed), packagesCount, package.Name.Filename));
 
-            var processed = Interlocked.Increment(ref _processed);
-            reporter.Report(new ProgressInfo(processed, packagesCount, package.Name.Filename));
+            await Task.WhenAll(package.Files.Select(f => MatchPackageFileAsync(package, f, freeFilesSet)));
         }
 
         private async Task MatchPackageFileAsync(VarPackage package, VarPackageFile packageFile, ConcurrentDictionary<string, List<FreeFile>> freeFilesSet)

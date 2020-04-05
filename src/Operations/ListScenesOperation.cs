@@ -99,6 +99,8 @@ namespace Varbsorb.Operations
 
         private async Task ScanSceneAsync(string vam, FreeFile potentialScene, int potentialScenesCount, ConcurrentDictionary<string, FreeFile> filesIndex, ProgressReporter<ProgressInfo> reporter)
         {
+            reporter.Report(new ProgressInfo(Interlocked.Increment(ref _scanned), potentialScenesCount, potentialScene.LocalPath));
+
             var potentialSceneJson = await _fs.File.ReadAllTextAsync(potentialScene.Path);
             var potentialSceneReferences = _findFilesFastRegex.Matches(potentialSceneJson).Where(m => m.Success).Select(m => m.Groups["path"]);
             var sceneFolder = _fs.Path.GetDirectoryName(potentialScene.Path);
@@ -127,9 +129,6 @@ namespace Varbsorb.Operations
             var item = new SceneFile(potentialScene, references, missing.ToList());
             if (references.Count > 0)
                 _scenes.Add(item);
-
-            var scanned = Interlocked.Increment(ref _scanned);
-            reporter.Report(new ProgressInfo(scanned, potentialScenesCount, potentialScene.LocalPath));
         }
     }
 
