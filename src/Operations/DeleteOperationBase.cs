@@ -45,7 +45,14 @@ namespace Varbsorb.Operations
                     reporter.Report(new ProgressInfo(Interlocked.Increment(ref _processed), filesToDelete.Count, file.LocalPath));
 
                     if (verbosity == VerbosityOptions.Verbose) Output.WriteLine($"{(execution == ExecutionOptions.Noop ? "[NOOP]" : "DELETE")}: {file.LocalPath}");
-                    if (execution != ExecutionOptions.Noop) DeleteFile(file.Path, delete);
+                    if (execution == ExecutionOptions.Noop)
+                    {
+                        _logger.Log($"[DELETE(NOOP)] {file.Path}");
+                    }
+                    else
+                    {
+                        DeleteFile(file.Path, delete);
+                    }
                     lock (_sync)
                     {
                         files.Remove(file);

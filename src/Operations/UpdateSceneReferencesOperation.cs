@@ -81,7 +81,11 @@ namespace Varbsorb.Operations
             {
                 var sb = await sceneJsonTask.Value;
                 Interlocked.Increment(ref _updated);
-                if (execution != ExecutionOptions.Noop)
+                if (execution == ExecutionOptions.Noop)
+                {
+                    _logger.Log($"[WRITE(NOOP)] {scene.File.Path}");
+                }
+                else
                 {
                     _logger.Log($"[WRITE] {scene.File.Path}");
                     await _fs.File.WriteAllTextAsync(scene.File.Path, sb.ToString());
