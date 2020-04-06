@@ -11,28 +11,28 @@ using Varbsorb.Models;
 
 namespace Varbsorb.Operations
 {
-    public class ListScenesOperation : OperationBase, IListScenesOperation
+    public class ScanJsonFilesOperation : OperationBase, IScanJsonFilesOperation
     {
         protected override string Name => "Scan scene references";
 
         private static readonly Regex _findFilesFastRegex = new Regex(
-            "\"(assetUrl|audioClip|url|uid|sceneFilePath|plugin#[0-9+]|act1Target[0-9]+ValueName)\" ?: ?\"(?<path>[^\"]+\\.[a-zA-Z]{2,6})\"",
+            "\"(assetUrl|audioClip|url|uid|JsonFilePath|plugin#[0-9+]|act1Target[0-9]+ValueName)\" ?: ?\"(?<path>[^\"]+\\.[a-zA-Z]{2,6})\"",
             RegexOptions.Compiled | RegexOptions.ExplicitCapture,
             TimeSpan.FromSeconds(10));
 
         private readonly IFileSystem _fs;
-        private readonly ConcurrentBag<SceneFile> _scenes = new ConcurrentBag<SceneFile>();
+        private readonly ConcurrentBag<JsonFile> _scenes = new ConcurrentBag<JsonFile>();
         private int _scanned = 0;
 
         private int _warningsLeft = 100;
 
-        public ListScenesOperation(IConsoleOutput output, IFileSystem fs)
+        public ScanJsonFilesOperation(IConsoleOutput output, IFileSystem fs)
             : base(output)
         {
             _fs = fs;
         }
 
-        public async Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter, ErrorReportingOptions warnings)
+        public async Task<IList<JsonFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter, ErrorReportingOptions warnings)
         {
             var filesIndex = new ConcurrentDictionary<string, FreeFile>(files.ToDictionary(f => f.Path, f => f));
             using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
@@ -77,7 +77,7 @@ namespace Varbsorb.Operations
             return refPath;
         }
 
-        private void PrintWarnings(List<SceneFile> scenes)
+        private void PrintWarnings(List<JsonFile> scenes)
         {
             foreach (var scene in scenes.Where(s => s.Missing.Count > 0))
             {
@@ -126,14 +126,14 @@ namespace Varbsorb.Operations
                     missing.Add(refPath);
                 }
             }
-            var item = new SceneFile(potentialScene, references, missing.ToList());
+            var item = new JsonFile(potentialScene, references, missing.ToList());
             if (references.Count > 0)
                 _scenes.Add(item);
         }
     }
 
-    public interface IListScenesOperation : IOperation
+    public interface IScanJsonFilesOperation : IOperation
     {
-        Task<IList<SceneFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter, ErrorReportingOptions warnings);
+        Task<IList<JsonFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter, ErrorReportingOptions warnings);
     }
 }

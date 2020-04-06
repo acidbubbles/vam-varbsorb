@@ -13,7 +13,7 @@ using Varbsorb.Models;
 
 namespace Varbsorb.Operations
 {
-    public class ListVarPackagesOperation : OperationBase, IListVarPackagesOperation
+    public class ScanVarPackagesOperation : OperationBase, IScanVarPackagesOperation
     {
         protected override string Name => "Scan var packages";
 
@@ -24,7 +24,7 @@ namespace Varbsorb.Operations
         private int _scanned = 0;
         private int _files = 0;
 
-        public ListVarPackagesOperation(IConsoleOutput output, IFileSystem fs, IHashingAlgo hashingAlgo)
+        public ScanVarPackagesOperation(IConsoleOutput output, IFileSystem fs, IHashingAlgo hashingAlgo)
             : base(output)
         {
             _fs = fs;
@@ -90,7 +90,7 @@ namespace Varbsorb.Operations
         }
     }
 
-    public interface IListVarPackagesOperation : IOperation
+    public interface IScanVarPackagesOperation : IOperation
     {
         Task<IList<VarPackage>> ExecuteAsync(string vam);
     }

@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using System.Linq;
@@ -8,13 +8,13 @@ using Varbsorb.Hashing;
 
 namespace Varbsorb.Operations
 {
-    public class ListVarPackagesOperationsTests : OperationTestsBase
+    public class ScanVarPackagesOperationsTests : OperationTestsBase
     {
         [Test]
         public async Task CanExecute()
         {
             _fs.AddFile(@$"{_vamPath}\AddonPackages\Author.Package.1.var", new MockFileData(CreateFakeZip()));
-            var op = new ListVarPackagesOperation(_consoleOutput.Object, _fs, new SHA1HashingAlgo());
+            var op = new ScanVarPackagesOperation(_consoleOutput.Object, _fs, new SHA1HashingAlgo());
 
             var files = await op.ExecuteAsync(_vamPath);
 

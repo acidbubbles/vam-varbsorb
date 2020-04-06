@@ -11,7 +11,7 @@ using Varbsorb.Models;
 
 namespace Varbsorb.Operations
 {
-    public class UpdateSceneReferencesOperation : OperationBase, IUpdateSceneReferencesOperation
+    public class UpdateJsonFileReferencesOperation : OperationBase, IUpdateJsonFileReferencesOperation
     {
         protected override string Name => "Update scene references";
 
@@ -21,19 +21,19 @@ namespace Varbsorb.Operations
         private int _updatedReferences;
         private int _updatedScenes;
 
-        public UpdateSceneReferencesOperation(IConsoleOutput output, IFileSystem fs, ILogger logger)
+        public UpdateJsonFileReferencesOperation(IConsoleOutput output, IFileSystem fs, ILogger logger)
             : base(output)
         {
             _fs = fs;
             _logger = logger;
         }
 
-        public async Task ExecuteAsync(IList<SceneFile> scenes, IList<FreeFilePackageMatch> matches, ExecutionOptions execution)
+        public async Task ExecuteAsync(IList<JsonFile> scenes, IList<FreeFilePackageMatch> matches, ExecutionOptions execution)
         {
             var matchesIndex = matches.SelectMany(m => m.FreeFiles.SelectMany(ff => ff.SelfAndChildren()).Select(ff => (m, ff))).GroupBy(x => x.ff).ToDictionary(x => x.Key, x => x.Select(z => z.m).ToList());
             using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
-                var processSceneBlock = new ActionBlock<SceneFile>(
+                var processSceneBlock = new ActionBlock<JsonFile>(
                     scene => ProcessSceneAsync(scenes, execution, matchesIndex, reporter, scene),
                     new ExecutionDataflowBlockOptions
                     {
@@ -63,7 +63,7 @@ namespace Varbsorb.Operations
                 .First();
         }
 
-        private async Task ProcessSceneAsync(IList<SceneFile> scenes, ExecutionOptions execution, Dictionary<FreeFile, List<FreeFilePackageMatch>> matchesIndex, ProgressReporter<ProgressInfo> reporter, SceneFile scene)
+        private async Task ProcessSceneAsync(IList<JsonFile> scenes, ExecutionOptions execution, Dictionary<FreeFile, List<FreeFilePackageMatch>> matchesIndex, ProgressReporter<ProgressInfo> reporter, JsonFile scene)
         {
             reporter.Report(new ProgressInfo(Interlocked.Increment(ref _processed), scenes.Count, scene.File.LocalPath));
 
@@ -96,8 +96,8 @@ namespace Varbsorb.Operations
         }
     }
 
-    public interface IUpdateSceneReferencesOperation : IOperation
+    public interface IUpdateJsonFileReferencesOperation : IOperation
     {
-        Task ExecuteAsync(IList<SceneFile> scenes, IList<FreeFilePackageMatch> matches, ExecutionOptions execution);
+        Task ExecuteAsync(IList<JsonFile> scenes, IList<FreeFilePackageMatch> matches, ExecutionOptions execution);
     }
 }

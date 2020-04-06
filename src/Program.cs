@@ -74,12 +74,12 @@ namespace Varbsorb
             builder.RegisterType<SHA1HashingAlgo>().As<IHashingAlgo>().SingleInstance();
             builder.RegisterType<RecycleBin>().As<IRecycleBin>().SingleInstance();
 
-            builder.RegisterType<ListVarPackagesOperation>().As<IListVarPackagesOperation>();
-            builder.RegisterType<ListFilesOperation>().As<IListFilesOperation>();
+            builder.RegisterType<ScanVarPackagesOperation>().As<IScanVarPackagesOperation>();
+            builder.RegisterType<ScanFilesOperation>().As<IScanFilesOperation>();
             builder.RegisterType<MatchFilesToPackagesOperation>().As<IMatchFilesToPackagesOperation>();
-            builder.RegisterType<ListScenesOperation>().As<IListScenesOperation>();
+            builder.RegisterType<ScanJsonFilesOperation>().As<IScanJsonFilesOperation>();
             builder.RegisterType<DeleteMatchedFilesOperation>().As<IDeleteMatchedFilesOperation>();
-            builder.RegisterType<UpdateSceneReferencesOperation>().As<IUpdateSceneReferencesOperation>();
+            builder.RegisterType<UpdateJsonFileReferencesOperation>().As<IUpdateJsonFileReferencesOperation>();
             builder.RegisterType<DeleteOrphanMorphFilesOperation>().As<IDeleteOrphanMorphFilesOperation>();
 
             builder.RegisterType<OperationsFactory>().As<IOperationsFactory>();

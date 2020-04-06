@@ -1,11 +1,11 @@
-using System.IO.Abstractions.TestingHelpers;
+﻿using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace Varbsorb.Operations
 {
-    public class ListFilesOperationsTests : OperationTestsBase
+    public class ScanFilesOperationsTests : OperationTestsBase
     {
         [Test]
         public async Task CanExecute()
@@ -17,7 +17,7 @@ namespace Varbsorb.Operations
             _fs.AddFile(@$"{_vamPath}\Custom\Scripts\Author\Package\src\Child2.cs", new MockFileData("child script 2"));
             _fs.AddFile(@$"{_vamPath}\Saves\scene\Custom\Morph.vmi", new MockFileData("{}"));
             _fs.AddFile(@$"{_vamPath}\Saves\scene\Custom\Morph.vmb", new MockFileData("binary"));
-            var op = new ListFilesOperation(_consoleOutput.Object, _fs);
+            var op = new ScanFilesOperation(_consoleOutput.Object, _fs);
 
             var files = await op.ExecuteAsync(_vamPath);
 

@@ -10,13 +10,13 @@ using Varbsorb.Models;
 
 namespace Varbsorb.Operations
 {
-    public class ListFilesOperation : OperationBase, IListFilesOperation
+    public class ScanFilesOperation : OperationBase, IScanFilesOperation
     {
         protected override string Name => "Scan files";
         private readonly IFileSystem _fs;
         private int _scanned = 0;
 
-        public ListFilesOperation(IConsoleOutput output, IFileSystem fs)
+        public ScanFilesOperation(IConsoleOutput output, IFileSystem fs)
             : base(output)
         {
             _fs = fs;
@@ -99,7 +99,7 @@ namespace Varbsorb.Operations
         }
     }
 
-    public interface IListFilesOperation : IOperation
+    public interface IScanFilesOperation : IOperation
     {
         Task<IList<FreeFile>> ExecuteAsync(string vam);
     }

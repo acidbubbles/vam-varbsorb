@@ -29,11 +29,11 @@ namespace Varbsorb
 
             var sw = Stopwatch.StartNew();
 
-            var varFiles = await _operationsFactory.Get<IListVarPackagesOperation>().ExecuteAsync(vam);
-            var freeFiles = await _operationsFactory.Get<IListFilesOperation>().ExecuteAsync(vam);
+            var varFiles = await _operationsFactory.Get<IScanVarPackagesOperation>().ExecuteAsync(vam);
+            var freeFiles = await _operationsFactory.Get<IScanFilesOperation>().ExecuteAsync(vam);
             var matches = await _operationsFactory.Get<IMatchFilesToPackagesOperation>().ExecuteAsync(varFiles, freeFiles);
-            var scenes = await _operationsFactory.Get<IListScenesOperation>().ExecuteAsync(vam, freeFiles, filter, warnings);
-            await _operationsFactory.Get<IUpdateSceneReferencesOperation>().ExecuteAsync(scenes, matches, execution);
+            var scenes = await _operationsFactory.Get<IScanJsonFilesOperation>().ExecuteAsync(vam, freeFiles, filter, warnings);
+            await _operationsFactory.Get<IUpdateJsonFileReferencesOperation>().ExecuteAsync(scenes, matches, execution);
             await _operationsFactory.Get<IDeleteMatchedFilesOperation>().ExecuteAsync(freeFiles, matches, delete, filter, verbosity, execution);
             await _operationsFactory.Get<IDeleteOrphanMorphFilesOperation>().ExecuteAsync(freeFiles, delete, filter, verbosity, execution);
 

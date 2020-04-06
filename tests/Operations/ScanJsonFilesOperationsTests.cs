@@ -1,11 +1,11 @@
-using System.IO.Abstractions.TestingHelpers;
+﻿using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace Varbsorb.Operations
 {
-    public class ListScenesOperationsTests : OperationTestsBase
+    public class ScanJsonFilesOperationsTests : OperationTestsBase
     {
         [Test]
         public async Task CanExecute()
@@ -21,7 +21,7 @@ namespace Varbsorb.Operations
             }".Replace("\r\n", "\n")));
             _fs.AddFile(@$"{_vamPath}\Saves\scene\party\ScriptRel.cs", new MockFileData("public class ScriptRel : MVRScript {}"));
             _fs.AddFile(@$"{_vamPath}\Custom\Scripts\ScriptAbs.cs", new MockFileData("public class ScriptAbs : MVRScript {}"));
-            var op = new ListScenesOperation(_consoleOutput.Object, _fs);
+            var op = new ScanJsonFilesOperation(_consoleOutput.Object, _fs);
             var files = GivenFiles(
                 @"Saves\scene\party\Party.json",
                 @"Saves\scene\party\ScriptRel.cs",

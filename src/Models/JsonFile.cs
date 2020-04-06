@@ -2,13 +2,13 @@ using System.Collections.Generic;
 
 namespace Varbsorb.Models
 {
-    public class SceneFile
+    public class JsonFile
     {
         public FreeFile File { get; set; }
         public IList<SceneReference> References { get; }
         public IList<string> Missing { get; }
 
-        public SceneFile(FreeFile file, IList<SceneReference> references, IList<string> missing)
+        public JsonFile(FreeFile file, IList<SceneReference> references, IList<string> missing)
         {
             File = file;
             References = references;
