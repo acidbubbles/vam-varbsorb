@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
-using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Varbsorb.Models;
@@ -50,7 +49,7 @@ namespace Varbsorb.Operations
                 {
                     if (f.Extension == ".exe")
                     {
-                        throw new SecurityException($"An executable file was found in your '{vam}' folder: '{f.Path}'");
+                        throw new VarbsorberException($"An executable file was found in your '{vam}' folder: '{f.Path}'");
                     }
                 });
         }
