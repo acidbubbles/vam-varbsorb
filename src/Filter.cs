@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Varbsorb.Models;
 
@@ -13,16 +15,25 @@ namespace Varbsorb
             public string? Path { get; set; }
         }
 
-        public static IFilter From(string[]? include, string[]? exclude)
+        public static IFilter From(string vam, string[]? include, string[]? exclude)
         {
             if (include == null && exclude == null) return None;
             var includeSplit = include?.Select(f => VarPackageName.TryGet(f, out var name) ? new VarOrPath { Var = name } : new VarOrPath { Path = f }).ToList();
             var excludeSplit = exclude?.Select(f => VarPackageName.TryGet(f, out var name) ? new VarOrPath { Var = name } : new VarOrPath { Path = f }).ToList();
             return new IncludeExcludeFilter(
-                includeSplit?.Where(f => !string.IsNullOrWhiteSpace(f.Path)).Select(f => f.Path!.Trim()).ToArray(),
+                includeSplit?.Where(f => !string.IsNullOrWhiteSpace(f.Path)).Select(f => f.Path!.Trim()).Tap(f => SanitizeFilterPath(vam, f)).ToArray(),
                 includeSplit?.Where(f => f.Var != null).Select(f => f.Var!).ToArray(),
                 excludeSplit?.Where(f => !string.IsNullOrWhiteSpace(f.Path)).Select(f => f.Path!.Trim()).ToArray(),
                 excludeSplit?.Where(f => f.Var != null).Select(f => f.Var!).ToArray());
+        }
+
+        private static string SanitizeFilterPath(string vam, string f)
+        {
+            if (!Path.IsPathFullyQualified(f)) f = Path.Combine(vam, f);
+            f = Path.GetFullPath(f);
+            if (!f.StartsWith(vam)) throw new VarbsorberException($"Filter '{f}' is not within the vam folder");
+            if (!f.StartsWith(Path.Combine(vam, "Saves"))) throw new VarbsorberException($"Filter '{f}' is not within the vam Saves folder");
+            return f.Substring(vam.Length + 1);
         }
     }
 
@@ -30,6 +41,7 @@ namespace Varbsorb
     {
         public bool IsFiltered(string path) => false;
         public bool IsFiltered(VarPackageName package) => false;
+        public IEnumerable<string> GetPaths() => new string[0];
     }
 
     public class IncludeExcludeFilter : IFilter
@@ -82,11 +94,26 @@ namespace Varbsorb
             }
             return false;
         }
+
+        public IEnumerable<string> GetPaths()
+        {
+            if (_includePaths != null)
+            {
+                foreach (var path in _includePaths)
+                    yield return path;
+            }
+            if (_excludePaths != null)
+            {
+                foreach (var path in _excludePaths)
+                    yield return path;
+            }
+        }
     }
 
     public interface IFilter
     {
         bool IsFiltered(string localPath);
         bool IsFiltered(VarPackageName package);
+        IEnumerable<string> GetPaths();
     }
 }

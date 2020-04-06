@@ -12,7 +12,7 @@ namespace Varbsorb
         [TestCase(new[] { @"Saves\folder" }, new[] { @"Saves\folder\file.json" }, @"Saves\folder\file.json", false)]
         public void PathFilter(string[] includes, string[] excludes, string path, bool included)
         {
-            var filter = Filter.From(includes, excludes);
+            var filter = Filter.From(@"C:\VaM", includes, excludes);
             Assert.That(!filter.IsFiltered(path), Is.EqualTo(included));
         }
 
@@ -22,7 +22,7 @@ namespace Varbsorb
         [TestCase(new[] { @"Author.*.*.var" }, new[] { @"Author.Package.1.var" }, @"Author.Package.1.var", false)]
         public void PackageFilter(string[] includes, string[] excludes, string name, bool included)
         {
-            var filter = Filter.From(includes, excludes);
+            var filter = Filter.From(@"C:\VaM", includes, excludes);
             Assert.That(!filter.IsFiltered(VarPackageName.TryGet(name, out var x) ? x : null), Is.EqualTo(included));
         }
     }

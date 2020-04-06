@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO.Abstractions;
-using System.Linq;
 using System.Threading.Tasks;
 using Varbsorb.Operations;
 
@@ -25,7 +24,7 @@ namespace Varbsorb
         public async Task ExecuteAsync(string vam, string[]? include, string[]? exclude, DeleteOptions delete, VerbosityOptions verbosity, ErrorReportingOptions warnings, ExecutionOptions execution)
         {
             vam = SanitizeVamRootFolder(vam);
-            var filter = BuildFilter(vam, include, exclude);
+            var filter = Filter.From(vam, include, exclude);
 
             var sw = Stopwatch.StartNew();
 
@@ -38,13 +37,6 @@ namespace Varbsorb
             await _operationsFactory.Get<IDeleteOrphanMorphFilesOperation>().ExecuteAsync(freeFiles, delete, filter, verbosity, execution);
 
             _output.WriteLine($"Cleanup complete in {sw.Elapsed.Milliseconds / 1000f:0.00} seconds.");
-        }
-
-        public IFilter BuildFilter(string vam, string[]? include, string[]? exclude)
-        {
-            return Filter.From(
-                include?.Select(f => SanitizeFilterPath(vam, f)).ToArray(),
-                exclude?.Select(f => SanitizeFilterPath(vam, f)).ToArray());
         }
 
         private string SanitizeVamRootFolder(string vam)
@@ -60,15 +52,6 @@ namespace Varbsorb
 
             if (vam.EndsWith('/') || vam.EndsWith('\\')) vam = vam[0..^1];
             return vam;
-        }
-
-        private string SanitizeFilterPath(string vam, string f)
-        {
-            if (!_fs.Path.IsPathFullyQualified(f)) f = _fs.Path.Combine(vam, f);
-            f = _fs.Path.GetFullPath(f);
-            if (!f.StartsWith(vam)) throw new VarbsorberException($"Filter '{f}' is not within the vam folder");
-            if (!f.StartsWith(_fs.Path.Combine(vam, "Saves"))) throw new VarbsorberException($"Filter '{f}' is not within the vam Saves folder");
-            return f.Substring(vam.Length + 1);
         }
     }
 }

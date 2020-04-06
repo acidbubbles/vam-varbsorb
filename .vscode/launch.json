@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/src/bin/Debug/netcoreapp3.1/varbsorb.dll",
-            "args": ["--vam", "${input:vam}", "--log", "${env:TEMP}\\varbsorb.txt"],
+            "args": ["--vam", "${input:vam}", "--log", "${env:TEMP}\\varbsorb.txt", "--exclude", "AcidBubbles.*.*.var"],
             "cwd": "${workspaceFolder}/src",
             "console": "externalTerminal",
             "stopAtEntry": false

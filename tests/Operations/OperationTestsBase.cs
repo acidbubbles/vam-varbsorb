@@ -37,5 +37,10 @@ namespace Varbsorb.Operations
             _fs.AddFile(file.Path, new MockFileData(contents));
             return file;
         }
+
+        protected IFilter GivenExcludes(params string[] excluded)
+        {
+            return Filter.From(_vamPath, null, excluded);
+        }
     }
 }
