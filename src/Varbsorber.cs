@@ -28,7 +28,7 @@ namespace Varbsorb
 
             var sw = Stopwatch.StartNew();
 
-            var varFiles = await _operationsFactory.Get<IScanVarPackagesOperation>().ExecuteAsync(vam, filter);
+            var varFiles = await _operationsFactory.Get<IScanVarPackagesOperation>().ExecuteAsync(vam, filter, verbosity);
             var freeFiles = await _operationsFactory.Get<IScanFilesOperation>().ExecuteAsync(vam);
             var matches = await _operationsFactory.Get<IMatchFilesToPackagesOperation>().ExecuteAsync(varFiles, freeFiles);
             var scenes = await _operationsFactory.Get<IScanJsonFilesOperation>().ExecuteAsync(vam, freeFiles, filter, warnings);

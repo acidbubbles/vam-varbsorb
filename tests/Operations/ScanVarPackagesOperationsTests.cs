@@ -3,8 +3,10 @@ using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using Moq;
 using NUnit.Framework;
 using Varbsorb.Hashing;
+using Varbsorb.Logging;
 
 namespace Varbsorb.Operations
 {
@@ -15,9 +17,9 @@ namespace Varbsorb.Operations
         {
             _fs.AddFile(@$"{_vamPath}\AddonPackages\Author.Package.1.var", new MockFileData(CreateFakeZip()));
             _fs.AddFile(@$"{_vamPath}\AddonPackages\Ignored.Package.1.var", new MockFileData(CreateFakeZip()));
-            var op = new ScanVarPackagesOperation(_consoleOutput.Object, _fs, new SHA1HashingAlgo());
+            var op = new ScanVarPackagesOperation(_consoleOutput.Object, _fs, new SHA1HashingAlgo(), Mock.Of<ILogger>());
 
-            var files = await op.ExecuteAsync(_vamPath, GivenExcludes("Ignored.*.*.var"));
+            var files = await op.ExecuteAsync(_vamPath, GivenExcludes("Ignored.*.*.var"), VerbosityOptions.Default);
 
             Assert.That(files.Select(f => f.Path), Is.EqualTo(new[]{
                 @$"{_vamPath}\AddonPackages\Author.Package.1.var",

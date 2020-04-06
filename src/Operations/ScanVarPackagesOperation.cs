@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Varbsorb.Hashing;
+using Varbsorb.Logging;
 using Varbsorb.Models;
 
 namespace Varbsorb.Operations
@@ -19,19 +20,21 @@ namespace Varbsorb.Operations
 
         private readonly IFileSystem _fs;
         private readonly IHashingAlgo _hashingAlgo;
-
+        private readonly ILogger _logger;
         private readonly ConcurrentBag<VarPackage> _packages = new ConcurrentBag<VarPackage>();
+        private readonly ConcurrentBag<string> _errors = new ConcurrentBag<string>();
         private int _scanned = 0;
         private int _files = 0;
 
-        public ScanVarPackagesOperation(IConsoleOutput output, IFileSystem fs, IHashingAlgo hashingAlgo)
+        public ScanVarPackagesOperation(IConsoleOutput output, IFileSystem fs, IHashingAlgo hashingAlgo, ILogger logger)
             : base(output)
         {
             _fs = fs;
             _hashingAlgo = hashingAlgo;
+            _logger = logger;
         }
 
-        public async Task<IList<VarPackage>> ExecuteAsync(string vam, IFilter filter)
+        public async Task<IList<VarPackage>> ExecuteAsync(string vam, IFilter filter, VerbosityOptions verbosity)
         {
             using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
@@ -55,6 +58,21 @@ namespace Varbsorb.Operations
 
             Output.WriteLine($"Scanned {_files} files in {_packages.Count} var packages.");
 
+            if (_errors.Count > 0)
+            {
+                if (verbosity == VerbosityOptions.Verbose)
+                {
+                    foreach (var error in _errors.OrderBy(e => e))
+                    {
+                        Output.WriteLine(error);
+                    }
+                }
+                else
+                {
+                    Output.WriteLine($"Warning: {_errors} var packages could not be read. Run with --log or --verbose to see the details.");
+                }
+            }
+
             return _packages.ToList();
         }
 
@@ -65,19 +83,28 @@ namespace Varbsorb.Operations
             if (filter.IsFiltered(name)) return;
             reporter.Report(new ProgressInfo(Interlocked.Increment(ref _scanned), packageFilesCount, filename));
 
-            var files = new List<VarPackageFile>();
-            using var stream = _fs.File.OpenRead(file);
-            using var archive = new ZipArchive(stream);
-            foreach (var entry in archive.Entries)
+            try
             {
-                if (entry.FullName.EndsWith(@"/")) continue;
-                if (entry.FullName == "meta.json") continue;
-                var packageFile = await ReadPackageFileAsync(entry);
-                files.Add(packageFile);
-                Interlocked.Increment(ref _files);
+                var files = new List<VarPackageFile>();
+                using var stream = _fs.File.OpenRead(file);
+                using var archive = new ZipArchive(stream);
+                foreach (var entry in archive.Entries)
+                {
+                    if (entry.FullName.EndsWith(@"/")) continue;
+                    if (entry.FullName == "meta.json") continue;
+                    var packageFile = await ReadPackageFileAsync(entry);
+                    files.Add(packageFile);
+                    Interlocked.Increment(ref _files);
+                }
+                if (files.Count > 0)
+                    _packages.Add(new VarPackage(name, file, files));
             }
-            if (files.Count > 0)
-                _packages.Add(new VarPackage(name, file, files));
+            catch (Exception exc)
+            {
+                var message = $"[ERROR] Error loading var {filename}: {exc.Message}";
+                _errors.Add(message);
+                _logger.Log(message);
+            }
         }
 
         private async Task<VarPackageFile> ReadPackageFileAsync(ZipArchiveEntry entry)
@@ -94,6 +121,6 @@ namespace Varbsorb.Operations
 
     public interface IScanVarPackagesOperation : IOperation
     {
-        Task<IList<VarPackage>> ExecuteAsync(string vam, IFilter filter);
+        Task<IList<VarPackage>> ExecuteAsync(string vam, IFilter filter, VerbosityOptions verbosity);
     }
 }
