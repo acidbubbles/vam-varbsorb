@@ -22,7 +22,7 @@ namespace Varbsorb.Operations
             };
             var op = new DeleteOrphanMorphFilesOperation(_consoleOutput.Object, _fs, Mock.Of<IRecycleBin>(), Mock.Of<ILogger>());
 
-            await op.ExecuteAsync(files, DeleteOptions.Permanent, new ExcludeFilter(new[] { @"Saves\Filtered" }), VerbosityOptions.Default, ExecutionOptions.Default);
+            await op.ExecuteAsync(files, DeleteOptions.Permanent, Filter.From(null, new[] { @"Saves\Filtered" }), VerbosityOptions.Default, ExecutionOptions.Default);
 
             Assert.That(_fs.Directory.GetFiles(_vamPath, "*.*", SearchOption.AllDirectories), Is.EquivalentTo(new[]
             {

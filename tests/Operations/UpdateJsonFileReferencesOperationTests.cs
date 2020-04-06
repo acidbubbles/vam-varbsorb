@@ -62,7 +62,7 @@ namespace Varbsorb.Operations
         {
             return new FreeFilePackageMatch(
                 new VarPackage(
-                    new VarPackageName(filename),
+                    VarPackageName.TryGet(filename, out var name) ? name : null,
                     "absolute-path",
                     Enumerable
                     .Range(0, 1 + additionalFiles)

@@ -15,7 +15,7 @@ namespace Varbsorb
         private readonly IFileSystem _fs;
         private readonly IOperationsFactory _operationsFactory;
 
-        public Varbsorber(IConsoleOutput output, IFileSystem fs,  IOperationsFactory operationsFactory)
+        public Varbsorber(IConsoleOutput output, IFileSystem fs, IOperationsFactory operationsFactory)
         {
             _output = output;
             _fs = fs;
@@ -29,7 +29,7 @@ namespace Varbsorb
 
             var sw = Stopwatch.StartNew();
 
-            var varFiles = await _operationsFactory.Get<IScanVarPackagesOperation>().ExecuteAsync(vam);
+            var varFiles = await _operationsFactory.Get<IScanVarPackagesOperation>().ExecuteAsync(vam, filter);
             var freeFiles = await _operationsFactory.Get<IScanFilesOperation>().ExecuteAsync(vam);
             var matches = await _operationsFactory.Get<IMatchFilesToPackagesOperation>().ExecuteAsync(varFiles, freeFiles);
             var scenes = await _operationsFactory.Get<IScanJsonFilesOperation>().ExecuteAsync(vam, freeFiles, filter, warnings);

@@ -14,8 +14,8 @@ namespace Varbsorb
         /// Varsborb: Clean your Virt-A-Mate install folder of duplicates found in var files.
         /// </summary>
         /// <param name="vam">The Virt-A-Mate install folder.</param>
-        /// <param name="include">Filter which files will be included. You can specify partial paths starting from the vam root.</param>
-        /// <param name="exclude">Filter which files will be excluded. You can specify partial paths starting from the vam root.</param>
+        /// <param name="include">Filter which files will be included. You can specify partial paths starting from the vam root, or a .var filename with asterisk support.</param>
+        /// <param name="exclude">Filter which files will be excluded. You can specify partial paths starting from the vam root, or a .var filename with asterisk support.</param>
         /// <param name="permanent">Whether to permanently delete files. By default, deleted files will be sent to the recycle bin.</param>
         /// <param name="verbose">Prints detailed output.</param>
         /// <param name="warnings">Prints broken scene references.</param>

@@ -29,7 +29,7 @@ namespace Varbsorb.Operations
                 @"Custom\Scripts\Legacy.cs"
             );
 
-            var scenes = await op.ExecuteAsync(_vamPath, files, new ExcludeFilter(new[] { @"Saves\scene\ignored\" }), ErrorReportingOptions.None);
+            var scenes = await op.ExecuteAsync(_vamPath, files, Filter.From(null, new[] { @"Saves\scene\ignored\" }), ErrorReportingOptions.None);
 
             Assert.That(scenes.Count, Is.EqualTo(1));
 

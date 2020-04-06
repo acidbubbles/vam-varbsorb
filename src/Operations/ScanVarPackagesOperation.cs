@@ -31,14 +31,14 @@ namespace Varbsorb.Operations
             _hashingAlgo = hashingAlgo;
         }
 
-        public async Task<IList<VarPackage>> ExecuteAsync(string vam)
+        public async Task<IList<VarPackage>> ExecuteAsync(string vam, IFilter filter)
         {
             using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
-                var packageFiles = _fs.Directory.GetFiles(_fs.Path.Combine(vam, "AddonPackages"), "*.var");
+                var packageFiles = _fs.Directory.GetFiles(_fs.Path.Combine(vam, "AddonPackages"), "*.var", SearchOption.AllDirectories);
 
                 var scanPackageBlock = new ActionBlock<string>(
-                    f => ExecuteOneAsync(reporter, packageFiles.Length, f),
+                    f => ExecuteOneAsync(reporter, filter, packageFiles.Length, f),
                     new ExecutionDataflowBlockOptions
                     {
                         MaxDegreeOfParallelism = 4
@@ -58,9 +58,11 @@ namespace Varbsorb.Operations
             return _packages.ToList();
         }
 
-        private async Task ExecuteOneAsync(IProgress<ProgressInfo> reporter, int packageFilesCount, string file)
+        private async Task ExecuteOneAsync(IProgress<ProgressInfo> reporter, IFilter filter, int packageFilesCount, string file)
         {
             var filename = _fs.Path.GetFileName(file);
+            if (!VarPackageName.TryGet(filename, out var name) || name == null) throw new VarbsorberException($"Invalid var package name: '{filename}'");
+            if (filter.IsFiltered(name)) return;
             reporter.Report(new ProgressInfo(Interlocked.Increment(ref _scanned), packageFilesCount, filename));
 
             var files = new List<VarPackageFile>();
@@ -75,7 +77,7 @@ namespace Varbsorb.Operations
                 Interlocked.Increment(ref _files);
             }
             if (files.Count > 0)
-                _packages.Add(new VarPackage(new VarPackageName(filename), file, files));
+                _packages.Add(new VarPackage(name, file, files));
         }
 
         private async Task<VarPackageFile> ReadPackageFileAsync(ZipArchiveEntry entry)
@@ -92,6 +94,6 @@ namespace Varbsorb.Operations
 
     public interface IScanVarPackagesOperation : IOperation
     {
-        Task<IList<VarPackage>> ExecuteAsync(string vam);
+        Task<IList<VarPackage>> ExecuteAsync(string vam, IFilter filter);
     }
 }

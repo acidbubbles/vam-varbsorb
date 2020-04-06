@@ -21,14 +21,14 @@ namespace Varbsorb.Operations
             var matches = new List<FreeFilePackageMatch>
             {
                 new FreeFilePackageMatch(
-                     new VarPackage(new VarPackageName("Author.Name.1.var"), "absolute-path", new List<VarPackageFile>()),
+                     new VarPackage(VarPackageName.TryGet("Author.Name.1.var", out var name) ? name : null, "absolute-path", new List<VarPackageFile>()),
                      new VarPackageFile(@"Custom\Scripts\MyScript.cs", "hash"),
                      new[] { scriptFile, scriptListFile }
                 )
             };
             var op = new DeleteMatchedFilesOperation(_consoleOutput.Object, _fs, Mock.Of<IRecycleBin>(), Mock.Of<ILogger>());
 
-            await op.ExecuteAsync(files, matches, DeleteOptions.Permanent, new ExcludeFilter(new[] { @"Saves\Filtered" }), VerbosityOptions.Default, ExecutionOptions.Default);
+            await op.ExecuteAsync(files, matches, DeleteOptions.Permanent, Filter.From(null, new[] { @"Saves\Filtered" }), VerbosityOptions.Default, ExecutionOptions.Default);
 
             Assert.That(!_fs.FileExists(scriptFile.Path));
             Assert.That(!_fs.FileExists(scriptListFile.Path));

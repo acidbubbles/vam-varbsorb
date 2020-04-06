@@ -14,9 +14,10 @@ namespace Varbsorb.Operations
         public async Task CanExecute()
         {
             _fs.AddFile(@$"{_vamPath}\AddonPackages\Author.Package.1.var", new MockFileData(CreateFakeZip()));
+            _fs.AddFile(@$"{_vamPath}\AddonPackages\Ignored.Package.1.var", new MockFileData(CreateFakeZip()));
             var op = new ScanVarPackagesOperation(_consoleOutput.Object, _fs, new SHA1HashingAlgo());
 
-            var files = await op.ExecuteAsync(_vamPath);
+            var files = await op.ExecuteAsync(_vamPath, Filter.From(null, new[] { "Ignored.*.*.var" }));
 
             Assert.That(files.Select(f => f.Path), Is.EqualTo(new[]{
                 @$"{_vamPath}\AddonPackages\Author.Package.1.var",
