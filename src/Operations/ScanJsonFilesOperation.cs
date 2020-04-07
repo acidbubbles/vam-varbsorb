@@ -85,7 +85,7 @@ namespace Varbsorb.Operations
             foreach (var scene in scenes.Where(s => s.Missing.Count > 0))
             {
                 var missing = scene.Missing;
-                foreach (var brokenRef in missing.Distinct())
+                foreach (var brokenRef in missing.Distinct().OrderBy(m => m))
                 {
                     var message = $"[BROKEN-REF] {scene.File.LocalPath}: Reference not found: '{brokenRef}'";
                     _logger.Log(message);
