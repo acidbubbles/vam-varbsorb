@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using Varbsorb.Logging;
 using Varbsorb.Models;
 
 namespace Varbsorb.Operations
@@ -21,15 +22,17 @@ namespace Varbsorb.Operations
             TimeSpan.FromSeconds(10));
 
         private readonly IFileSystem _fs;
+        private readonly ILogger _logger;
         private readonly ConcurrentBag<JsonFile> _scenes = new ConcurrentBag<JsonFile>();
         private int _scanned = 0;
 
-        private int _warningsLeft = 100;
+        private int _warningsLeft = 50;
 
-        public ScanJsonFilesOperation(IConsoleOutput output, IFileSystem fs)
+        public ScanJsonFilesOperation(IConsoleOutput output, IFileSystem fs, ILogger logger)
             : base(output)
         {
             _fs = fs;
+            _logger = logger;
         }
 
         public async Task<IList<JsonFile>> ExecuteAsync(string vam, IList<FreeFile> files, IFilter filter, ErrorReportingOptions warnings)
@@ -82,16 +85,17 @@ namespace Varbsorb.Operations
             foreach (var scene in scenes.Where(s => s.Missing.Count > 0))
             {
                 var missing = scene.Missing;
-                if (_warningsLeft > 0)
+                foreach (var brokenRef in missing.Distinct())
                 {
-                    Output.WriteLine($"{missing.Count} missing references in scene {scene.File.LocalPath}");
-                    foreach (var brokenRef in missing.Distinct())
+                    var message = $"[BROKEN-REF] {scene.File.LocalPath}: Reference not found: '{brokenRef}'";
+                    _logger.Log(message);
+                    if (_warningsLeft > 0)
                     {
-                        Output.WriteLine($"- {brokenRef}");
+                        Output.WriteLine(message);
                     }
                     if (--_warningsLeft == 0)
                     {
-                        Output.WriteLine("Too many scene errors. Further missing references will not be printed.");
+                        Output.WriteLine("Too many scene errors. Further missing references will not be printed. Use --log to get them all.");
                     }
                 }
             }

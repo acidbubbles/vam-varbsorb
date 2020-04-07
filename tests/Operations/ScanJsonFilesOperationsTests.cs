@@ -1,7 +1,9 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
+using Moq;
 using NUnit.Framework;
+using Varbsorb.Logging;
 
 namespace Varbsorb.Operations
 {
@@ -21,7 +23,7 @@ namespace Varbsorb.Operations
             }".Replace("\r\n", "\n")));
             _fs.AddFile(@$"{_vamPath}\Saves\scene\party\ScriptRel.cs", new MockFileData("public class ScriptRel : MVRScript {}"));
             _fs.AddFile(@$"{_vamPath}\Custom\Scripts\ScriptAbs.cs", new MockFileData("public class ScriptAbs : MVRScript {}"));
-            var op = new ScanJsonFilesOperation(_consoleOutput.Object, _fs);
+            var op = new ScanJsonFilesOperation(_consoleOutput.Object, _fs, Mock.Of<ILogger>());
             var files = GivenFiles(
                 @"Saves\scene\party\Party.json",
                 @"Saves\scene\party\ScriptRel.cs",
