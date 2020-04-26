@@ -16,6 +16,7 @@ namespace Varbsorb.Operations
         private readonly ILogger _logger;
         private readonly object _sync = new object();
         private int _processed = 0;
+        private int _errors = 0;
 
         public DeleteOperationBase(IConsoleOutput output, IFileSystem fs, IRecycleBin recycleBin, ILogger logger)
             : base(output)
@@ -36,7 +37,7 @@ namespace Varbsorb.Operations
                 return Task.CompletedTask;
             }
 
-            var mbSaved = filesToDelete.Sum(f => (long)(f.Size ?? 0)) / 1024f / 1024f;
+            var mbSaved = 0f;
 
             using (var reporter = new ProgressReporter<ProgressInfo>(StartProgress, ReportProgress, CompleteProgress))
             {
@@ -48,10 +49,21 @@ namespace Varbsorb.Operations
                     if (execution == ExecutionOptions.Noop)
                     {
                         _logger.Log($"[DELETE(NOOP)] {file.Path}");
+                        mbSaved += (file.Size ?? 0f) / 1024f / 1024f;
                     }
                     else
                     {
-                        DeleteFile(file.Path, delete);
+                        if (DeleteFile(file.Path, delete))
+                        {
+                            lock (_sync)
+                            {
+                                mbSaved += (file.Size ?? 0f) / 1024f / 1024f;
+                            }
+                        }
+                        else
+                        {
+                            Interlocked.Increment(ref _errors);
+                        }
                     }
                     lock (_sync)
                     {
@@ -77,20 +89,34 @@ namespace Varbsorb.Operations
             else
                 Output.WriteLine($"{Name}: Deleted {filesToDelete.Count} files. Estimated {mbSaved:0.00}MB saved.");
 
+            if (_errors > 0)
+                Output.WriteLine($"{Name}: Could not delete {_errors} files. Enable logging to get more information.");
+
             return Task.CompletedTask;
         }
 
-        protected void DeleteFile(string path, DeleteOptions delete)
+        protected bool DeleteFile(string path, DeleteOptions delete)
         {
-            if (delete == DeleteOptions.Permanent)
+            try
             {
-                _logger.Log($"[DELETE] {path}");
-                FileSystem.File.Delete(path);
+                if (delete == DeleteOptions.Permanent)
+                {
+                    _logger.Log($"[DELETE] {path}");
+                    FileSystem.File.Delete(path);
+                }
+                else
+                {
+                    _logger.Log($"[RECYCLE] {path}");
+                    _recycleBin.Send(path);
+                }
+
+                return true;
             }
-            else
+            catch (Exception exc)
             {
-                _logger.Log($"[RECYCLE] {path}");
-                _recycleBin.Send(path);
+                _logger.Log($"Failed to delete '{path}': {exc.Message}");
+
+                return false;
             }
         }
     }
