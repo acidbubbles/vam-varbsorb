@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using Newtonsoft.Json;
 using Varbsorb.Hashing;
 using Varbsorb.Logging;
 using Varbsorb.Models;
@@ -23,6 +24,8 @@ namespace Varbsorb.Operations
         private readonly ILogger _logger;
         private readonly ConcurrentBag<VarPackage> _packages = new ConcurrentBag<VarPackage>();
         private readonly ConcurrentBag<string> _errors = new ConcurrentBag<string>();
+        private readonly JsonSerializer _serializer = new JsonSerializer();
+        private readonly string[] _morphExtensions = new[] { ".vmi", ".vmb" };
         private int _scanned = 0;
         private int _files = 0;
 
@@ -88,10 +91,22 @@ namespace Varbsorb.Operations
                 var files = new List<VarPackageFile>();
                 using var stream = _fs.File.OpenRead(file);
                 using var archive = new ZipArchive(stream);
+                var metaEntry = archive.Entries.FirstOrDefault(e => e.FullName == "meta.json");
+                if (metaEntry == null) throw new InvalidOperationException($"No meta.json available in .var package");
+                dynamic? meta;
+                using (var metaStream = metaEntry.Open())
+                using (var streamReader = new StreamReader(metaStream))
+                using (var jsonReader = new JsonTextReader(streamReader))
+                {
+                    meta = _serializer.Deserialize(jsonReader);
+                }
+                if (meta == null) throw new InvalidOperationException($"Could not deserialize meta.json from .var package (deserialized as null)");
+                var preloadMorphs = meta.customOptions?.preloadMorphs == "true";
                 foreach (var entry in archive.Entries)
                 {
                     if (entry.FullName.EndsWith(@"/")) continue;
                     if (entry.FullName == "meta.json") continue;
+                    if (!preloadMorphs && _morphExtensions.Contains(_fs.Path.GetExtension(entry.FullName).ToLowerInvariant())) continue;
                     var packageFile = await ReadPackageFileAsync(entry);
                     files.Add(packageFile);
                     Interlocked.Increment(ref _files);
