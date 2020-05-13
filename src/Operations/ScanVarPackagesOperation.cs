@@ -72,7 +72,7 @@ namespace Varbsorb.Operations
                 }
                 else
                 {
-                    Output.WriteLine($"Warning: {_errors} var packages could not be read. Run with --log or --verbose to see the details.");
+                    Output.WriteLine($"Warning: {_errors.Count} var packages could not be read. Run with --log or --verbose to see the details.");
                 }
             }
 
